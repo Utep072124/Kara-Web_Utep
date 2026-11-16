@@ -8,6 +8,7 @@
   <link rel="apple-touch-icon" href="icon.jpg" />
   <link rel="icon" type="image/jpeg" href="icon.jpg" />
   <title>Kara-Web Utep</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     :root {
       --bg: #0b0f19;
@@ -22,61 +23,113 @@
 
     header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; background: #0f1524; border-bottom: 1px solid #1e293b;
+      padding: 10px 14px; background: #0f1524; border-bottom: 1px solid #1e293b;
     }
-    .brand { font-weight: 800; font-size: 1.1rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand { font-weight: 800; font-size: 1.05rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-actions { display: flex; gap: 6px; }
 
+    /* Video Stage */
     .stage {
       position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 38dvh;
       background: #000; display: flex; align-items: center; justify-content: center;
-      border-bottom: 1px solid #1e293b;
+      border-bottom: 1px solid #1e293b; overflow: hidden;
     }
-    iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; }
-    .placeholder { text-align: center; color: var(--muted); padding: 20px; }
-    .placeholder h3 { color: var(--text); margin-bottom: 6px; font-size: 1.1rem; }
+    #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; }
 
-    .now-playing {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 10px 16px; background: var(--card); border-bottom: 1px solid #1e293b;
+    /* Fullscreen KTV Stage Mode */
+    .stage.fullscreen-mode {
+      position: fixed; inset: 0; width: 100vw; height: 100dvh; max-height: none;
+      z-index: 9999; border: none; background: #000;
     }
-    .np-info { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .np-title { font-weight: 600; font-size: 0.9rem; }
+
+    /* Fullscreen Top & Bottom HUD Overlays */
+    .fs-top-hud {
+      display: none; position: absolute; top: 0; left: 0; right: 0;
+      padding: 14px 18px; background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
+      justify-content: space-between; align-items: center; gap: 12px; z-index: 20; pointer-events: none;
+    }
+    .stage.fullscreen-mode .fs-top-hud { display: flex; }
+    .fs-up-next {
+      background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 210, 255, 0.4);
+      padding: 6px 12px; border-radius: 10px; font-size: 0.85rem; max-width: 65%;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: auto;
+    }
+    .fs-up-next span { color: var(--accent); font-weight: 700; margin-right: 6px; }
+
+    .fs-bottom-hud {
+      display: none; position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 16px 18px 24px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      justify-content: center; align-items: center; gap: 10px; z-index: 20;
+    }
+    .stage.fullscreen-mode .fs-bottom-hud { display: flex; }
+
+    /* Interlude / QR Code Overlay */
+    .qr-overlay {
+      position: absolute; inset: 0; background: radial-gradient(circle at center, #111827 0%, #050811 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 16px; z-index: 15;
+    }
+    .qr-overlay.hidden { display: none; }
+    .qr-card {
+      background: #fff; padding: 10px; border-radius: 14px;
+      box-shadow: 0 0 25px rgba(0, 210, 255, 0.35); margin-bottom: 10px;
+    }
+    .qr-card img { width: 120px; height: 120px; display: block; }
+    .stage.fullscreen-mode .qr-card img { width: 190px; height: 190px; }
+    .qr-title { font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 4px; }
+    .qr-sub { font-size: 0.78rem; color: var(--accent); }
+
+    /* Now Playing & Transport Controls */
+    .now-playing {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 14px; background: var(--card); border-bottom: 1px solid #1e293b;
+    }
+    .np-info { overflow: hidden; flex: 1; }
+    .np-title { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .np-next-mini { font-size: 0.72rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .transport-btns { display: flex; gap: 5px; flex-shrink: 0; }
+
     .btn {
       background: linear-gradient(135deg, var(--accent), #0284c7); color: #fff; border: none;
-      padding: 8px 12px; border-radius: 10px; font-weight: 600; font-size: 0.82rem; cursor: pointer;
+      padding: 7px 11px; border-radius: 9px; font-weight: 600; font-size: 0.8rem; cursor: pointer;
     }
-    .btn.secondary { background: #1e293b; color: var(--text); }
+    .btn.secondary { background: #1e293b; color: var(--text); border: 1px solid #334155; }
     .btn.danger { background: #dc2626; }
+    .btn.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); pointer-events: auto; }
 
+    /* Search Bar */
     .search-bar {
-      display: flex; gap: 8px; padding: 10px 16px; background: #0f1524; border-bottom: 1px solid #1e293b;
+      display: flex; gap: 8px; padding: 10px 14px; background: #0f1524; border-bottom: 1px solid #1e293b;
     }
     .search-bar input {
       flex: 1; background: #1e293b; border: 1px solid #334155; color: #fff;
-      padding: 10px 12px; border-radius: 10px; font-size: 1rem; outline: none;
+      padding: 9px 12px; border-radius: 10px; font-size: 0.95rem; outline: none;
     }
 
+    /* Tabs */
     .tabs { display: flex; background: #0f1524; border-bottom: 1px solid #1e293b; }
     .tab {
-      flex: 1; text-align: center; padding: 10px; font-weight: 600; font-size: 0.85rem;
+      flex: 1; text-align: center; padding: 9px; font-weight: 600; font-size: 0.82rem;
       color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
     }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    .list-container { flex: 1; overflow-y: auto; padding: 10px 16px 30px; }
+    /* List Area */
+    .list-container { flex: 1; overflow-y: auto; padding: 10px 14px 30px; }
     .song-item {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
       background: var(--card); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;
       border: 1px solid #1e293b;
     }
-    .song-thumb { width: 64px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
+    .song-thumb { width: 60px; height: 45px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
     .song-meta { overflow: hidden; flex: 1; }
-    .song-title { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
-    .song-artist { font-size: 0.75rem; color: var(--muted); }
+    .song-title { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .song-artist { font-size: 0.74rem; color: var(--muted); }
     .song-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .placeholder { text-align: center; color: var(--muted); padding: 20px; font-size: 0.9rem; }
 
     .status-banner {
-      background: #1e293b; color: var(--accent); font-size: 0.8rem; padding: 6px 16px; text-align: center;
+      background: #1e293b; color: var(--accent); font-size: 0.76rem; padding: 5px 14px; text-align: center;
     }
   </style>
 </head>
@@ -84,33 +137,61 @@
 
   <header>
     <div class="brand">KARA-WEB UTEP</div>
-    <div>
-      <input type="file" id="localFileInput" accept="video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
-      <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ Load File</button>
+    <div class="header-actions">
+      <input type="file" id="localFileInput" accept="video/mp4,video/quicktime,video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
+      <button class="btn secondary" onclick="toggleQrOverlay()">📱 QR</button>
+      <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ File</button>
+      <button class="btn" onclick="toggleFullscreenStage()">⛶ Stage</button>
     </div>
   </header>
 
-  <div id="statusBanner" class="status-banner">Search YouTube or tap "+ Load File" for local videos</div>
+  <div id="statusBanner" class="status-banner">Scan QR to open Songbook on any phone</div>
 
   <!-- Video Player Stage -->
   <div class="stage" id="playerStage">
-    <div class="placeholder">
-      <h3>Ready to Sing</h3>
-      <p>Search YouTube or load a local video file</p>
+    <!-- Top HUD for Fullscreen View -->
+    <div class="fs-top-hud">
+      <div class="fs-up-next" id="fsUpNext"><span>UP NEXT:</span> No song reserved</div>
+      <button class="btn glass" onclick="toggleFullscreenStage()">✕ Exit Stage</button>
+    </div>
+
+    <!-- Interlude / QR Code Screen -->
+    <div class="qr-overlay" id="qrOverlay">
+      <div class="qr-card">
+        <img id="qrImage" alt="Scan to Open Kara-Web Utep" />
+      </div>
+      <div class="qr-title">Scan to Reserve Songs</div>
+      <div class="qr-sub" id="qrUrlLabel">utep072124.github.io/Kara-Web_Utep</div>
+    </div>
+
+    <!-- Active Video Container -->
+    <div id="mediaMount" style="width:100%; height:100%;"></div>
+
+    <!-- Bottom Transport HUD for Fullscreen View -->
+    <div class="fs-bottom-hud">
+      <button class="btn glass" id="fsPlayPauseBtn" onclick="togglePlayPause()">⏯ Pause / Play</button>
+      <button class="btn danger" onclick="stopPlayback()">⏹ Stop</button>
+      <button class="btn" onclick="playNext()">⏭ Next Song</button>
+      <button class="btn glass" onclick="toggleQrOverlay()">📱 Show QR</button>
     </div>
   </div>
 
-  <!-- Now Playing Controls -->
+  <!-- Now Playing & Transport Controls -->
   <div class="now-playing">
     <div class="np-info">
       <span class="np-title" id="npTitle">No song playing</span>
+      <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
     </div>
-    <button class="btn secondary" onclick="playNext()">Next ⏭</button>
+    <div class="transport-btns">
+      <button class="btn secondary" onclick="togglePlayPause()" title="Play/Pause">⏯</button>
+      <button class="btn danger" onclick="stopPlayback()" title="Stop">⏹</button>
+      <button class="btn" onclick="playNext()" title="Next">⏭</button>
+    </div>
   </div>
 
   <!-- Search Input Bar -->
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search song (e.g., You've Got a Friend)..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+    <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
     <button class="btn" onclick="searchYouTube()">Search</button>
   </div>
 
@@ -127,10 +208,41 @@
 
   <script>
     const YOUTUBE_API_KEY = 'AIzaSyDBaE3nXzMESrJslYhZsn4ssGUOpVS1WZI';
+    const APP_URL = 'https://utep072124.github.io/Kara-Web_Utep/';
 
     let searchResults = [];
     let queue = [];
     let currentTab = 'search';
+    let ytPlayer = null;
+    let activeMediaType = null; // 'youtube' | 'local' | null
+    let isPaused = false;
+
+    // Initialize QR Code on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(APP_URL)}`;
+      document.getElementById('qrImage').src = qrSrc;
+      updateUpNextLabels();
+    });
+
+    function toggleFullscreenStage() {
+      const stage = document.getElementById('playerStage');
+      stage.classList.toggle('fullscreen-mode');
+    }
+
+    function toggleQrOverlay(forceState) {
+      const overlay = document.getElementById('qrOverlay');
+      if (typeof forceState === 'boolean') {
+        overlay.classList.toggle('hidden', !forceState);
+      } else {
+        overlay.classList.toggle('hidden');
+      }
+    }
+
+    function updateUpNextLabels() {
+      const nextText = queue.length > 0 ? queue[0].title : 'No song reserved';
+      document.getElementById('fsUpNext').innerHTML = `<span>UP NEXT:</span> ${nextText}`;
+      document.getElementById('npNextMini').innerText = `Up Next: ${nextText}`;
+    }
 
     function switchTab(tab) {
       currentTab = tab;
@@ -142,6 +254,7 @@
     function updateCounts() {
       document.getElementById('queueCount').innerText = queue.length;
       document.getElementById('resultCount').innerText = searchResults.length;
+      updateUpNextLabels();
     }
 
     function handleLocalFiles(event) {
@@ -153,7 +266,7 @@
         type: 'local',
         url: URL.createObjectURL(file),
         title: file.name.replace(/\.[^/.]+$/, ''),
-        channel: 'Local Device File',
+        channel: 'Local MP4/MOV File',
         thumbnail: ''
       }));
 
@@ -208,7 +321,7 @@
 
       if (currentTab === 'queue') {
         if (queue.length === 0) {
-          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Search or load files!</p></div>';
+          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Reserve a song!</p></div>';
           return;
         }
         queue.forEach((song, idx) => {
@@ -231,7 +344,7 @@
       }
 
       if (searchResults.length === 0) {
-        container.innerHTML = '<div class="placeholder"><p>No results yet. Search above or tap "+ Load File"</p></div>';
+        container.innerHTML = '<div class="placeholder"><p>No results yet. Search above or tap "+ File"</p></div>';
         return;
       }
 
@@ -258,7 +371,7 @@
       if (!song) return;
       queue.push(song);
       updateCounts();
-      if (document.getElementById('npTitle').innerText === 'No song playing') {
+      if (!activeMediaType) {
         playNext();
       }
     }
@@ -277,7 +390,10 @@
     }
 
     function playNext() {
-      if (queue.length === 0) return;
+      if (queue.length === 0) {
+        stopPlayback();
+        return;
+      }
       const nextSong = queue.shift();
       updateCounts();
       renderList();
@@ -289,14 +405,62 @@
       if (song) startStream(song);
     }
 
+    function togglePlayPause() {
+      if (activeMediaType === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+        const state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          ytPlayer.pauseVideo();
+          isPaused = true;
+        } else {
+          ytPlayer.playVideo();
+          isPaused = false;
+          toggleQrOverlay(false);
+        }
+      } else if (activeMediaType === 'local') {
+        const vid = document.getElementById('localVideoEl');
+        if (vid) {
+          if (vid.paused) {
+            vid.play();
+            toggleQrOverlay(false);
+          } else {
+            vid.pause();
+          }
+        }
+      }
+    }
+
+    function stopPlayback() {
+      activeMediaType = null;
+      ytPlayer = null;
+      document.getElementById('npTitle').innerText = 'Interlude — Ready for next singer';
+      document.getElementById('mediaMount').innerHTML = '';
+      toggleQrOverlay(true); // Show QR Code during interlude
+    }
+
     function startStream(song) {
       document.getElementById('npTitle').innerText = song.title;
-      const stage = document.getElementById('playerStage');
+      toggleQrOverlay(false); // Hide QR code while singing
+      const mount = document.getElementById('mediaMount');
 
       if (song.type === 'local') {
-        stage.innerHTML = `<video src="${song.url}" controls autoplay playsinline onended="playNext()"></video>`;
+        activeMediaType = 'local';
+        ytPlayer = null;
+        mount.innerHTML = `<video id="localVideoEl" src="${song.url}" controls autoplay playsinline onended="playNext()"></video>`;
       } else {
-        stage.innerHTML = `<iframe src="https://www.youtube.com/embed/${song.id}?autoplay=1&playsinline=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+        activeMediaType = 'youtube';
+        mount.innerHTML = `<div id="ytPlayerContainer"></div>`;
+        ytPlayer = new YT.Player('ytPlayerContainer', {
+          videoId: song.id,
+          playerVars: { autoplay: 1, playsinline: 1, rel: 0 },
+          events: {
+            onStateChange: (event) => {
+              // Automatically advance to next queued song when YouTube video ends
+              if (event.data === YT.PlayerState.ENDED) {
+                playNext();
+              }
+            }
+          }
+        });
       }
     }
   </script>
