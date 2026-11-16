@@ -36,48 +36,46 @@
     }
     #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; }
 
-    /* Fullscreen KTV Stage Mode */
-    .stage.fullscreen-mode {
-      position: fixed; inset: 0; width: 100vw; height: 100dvh; max-height: none;
-      z-index: 9999; border: none; background: #000;
-    }
+    /* Native Fullscreen Overlays (Hidden by default, shown via CSS when :fullscreen or webkit-fulllscreen is active) */
+    .fs-top-hud, .fs-bottom-hud, .qr-overlay { display: none; }
 
-    /* Fullscreen Top & Bottom HUD Overlays */
-    .fs-top-hud {
-      display: none; position: absolute; top: 0; left: 0; right: 0;
-      padding: 14px 18px; background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
-      justify-content: space-between; align-items: center; gap: 12px; z-index: 20; pointer-events: none;
+    /* Active Fullscreen HUD Styles */
+    .stage:fullscreen .fs-top-hud, .stage:-webkit-full-screen .fs-top-hud {
+      display: flex; position: absolute; top: 0; left: 0; right: 0;
+      padding: 12px 16px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+      justify-content: space-between; align-items: center; z-index: 99999; pointer-events: none;
     }
-    .stage.fullscreen-mode .fs-top-hud { display: flex; }
+    .stage:fullscreen .fs-bottom-hud, .stage:-webkit-full-screen .fs-bottom-hud {
+      display: flex; position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 16px; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+      justify-content: center; align-items: center; gap: 8px; z-index: 99999;
+    }
+    .stage:fullscreen .qr-overlay, .stage:-webkit-full-screen .qr-overlay {
+      display: flex; position: absolute; top: 50%; left: 24px; transform: translateY(-50%);
+      width: 130px; background: rgba(11, 15, 25, 0.85); border: 1px solid rgba(0, 210, 255, 0.4);
+      padding: 8px; border-radius: 12px; flex-direction: column; align-items: center; text-align: center;
+      z-index: 99998; backdrop-filter: blur(6px); box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .stage:fullscreen .qr-overlay.hidden, .stage:-webkit-full-screen .qr-overlay.hidden { display: none !important; }
+
     .fs-up-next {
-      background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 210, 255, 0.4);
-      padding: 6px 12px; border-radius: 10px; font-size: 0.85rem; max-width: 65%;
+      background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(0, 210, 255, 0.4);
+      padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; max-width: 60%;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: auto;
     }
-    .fs-up-next span { color: var(--accent); font-weight: 700; margin-right: 6px; }
+    .fs-up-next span { color: var(--accent); font-weight: 700; margin-right: 4px; }
 
-    .fs-bottom-hud {
-      display: none; position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 16px 18px 24px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-      justify-content: center; align-items: center; gap: 10px; z-index: 20;
-    }
-    .stage.fullscreen-mode .fs-bottom-hud { display: flex; }
+    .qr-card img { width: 110px; height: 110px; display: block; border-radius: 6px; }
+    .qr-title { font-weight: 700; font-size: 0.68rem; color: #fff; margin-top: 4px; }
 
-    /* Interlude / QR Code Overlay */
-    .qr-overlay {
+    /* Normal Mode QR Overlay (Inside regular stage view) */
+    .qr-overlay-normal {
       position: absolute; inset: 0; background: radial-gradient(circle at center, #111827 0%, #050811 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center; padding: 16px; z-index: 15;
     }
-    .qr-overlay.hidden { display: none; }
-    .qr-card {
-      background: #fff; padding: 10px; border-radius: 14px;
-      box-shadow: 0 0 25px rgba(0, 210, 255, 0.35); margin-bottom: 10px;
-    }
-    .qr-card img { width: 120px; height: 120px; display: block; }
-    .stage.fullscreen-mode .qr-card img { width: 190px; height: 190px; }
-    .qr-title { font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 4px; }
-    .qr-sub { font-size: 0.78rem; color: var(--accent); }
+    .qr-overlay-normal.hidden { display: none; }
+    .qr-overlay-normal img { width: 120px; height: 120px; border-radius: 8px; margin-bottom: 6px; }
 
     /* Now Playing & Transport Controls */
     .now-playing {
@@ -141,7 +139,7 @@
       <input type="file" id="localFileInput" accept="video/mp4,video/quicktime,video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
       <button class="btn secondary" onclick="toggleQrOverlay()">📱 QR</button>
       <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ File</button>
-      <button class="btn" onclick="toggleFullscreenStage()">⛶ Stage</button>
+      <button class="btn" onclick="requestNativeFullscreen()">⛶ Stage</button>
     </div>
   </header>
 
@@ -149,30 +147,36 @@
 
   <!-- Video Player Stage -->
   <div class="stage" id="playerStage">
-    <!-- Top HUD for Fullscreen View -->
+    
+    <!-- Native Fullscreen Top HUD -->
     <div class="fs-top-hud">
       <div class="fs-up-next" id="fsUpNext"><span>UP NEXT:</span> No song reserved</div>
-      <button class="btn glass" onclick="toggleFullscreenStage()">✕ Exit Stage</button>
+      <button class="btn glass" onclick="exitNativeFullscreen()">✕ Exit Stage</button>
     </div>
 
-    <!-- Interlude / QR Code Screen -->
-    <div class="qr-overlay" id="qrOverlay">
+    <!-- Native Fullscreen Left-Side Small QR Overlay (Interlude) -->
+    <div class="qr-overlay" id="fsQrOverlay">
       <div class="qr-card">
-        <img id="qrImage" alt="Scan to Open Kara-Web Utep" />
+        <img class="qrImgTag" alt="Scan QR" />
       </div>
-      <div class="qr-title">Scan to Reserve Songs</div>
-      <div class="qr-sub" id="qrUrlLabel">utep072124.github.io/Kara-Web_Utep</div>
+      <div class="qr-title">Scan to Reserve</div>
+    </div>
+
+    <!-- Normal Mode Interlude / QR Code Screen -->
+    <div class="qr-overlay-normal" id="normalQrOverlay">
+      <img class="qrImgTag" alt="Scan to Open Kara-Web Utep" />
+      <div style="font-weight:700; font-size:0.9rem; color:#fff; margin-top:4px;">Scan to Reserve Songs</div>
+      <div style="font-size:0.75rem; color:var(--accent);">utep072124.github.io/Kara-Web_Utep</div>
     </div>
 
     <!-- Active Video Container -->
     <div id="mediaMount" style="width:100%; height:100%;"></div>
 
-    <!-- Bottom Transport HUD for Fullscreen View -->
+    <!-- Native Fullscreen Bottom Transport HUD -->
     <div class="fs-bottom-hud">
-      <button class="btn glass" id="fsPlayPauseBtn" onclick="togglePlayPause()">⏯ Pause / Play</button>
+      <button class="btn glass" onclick="togglePlayPause()">⏯ Pause / Play</button>
       <button class="btn danger" onclick="stopPlayback()">⏹ Stop</button>
       <button class="btn" onclick="playNext()">⏭ Next Song</button>
-      <button class="btn glass" onclick="toggleQrOverlay()">📱 Show QR</button>
     </div>
   </div>
 
@@ -214,28 +218,39 @@
     let queue = [];
     let currentTab = 'search';
     let ytPlayer = null;
-    let activeMediaType = null; // 'youtube' | 'local' | null
-    let isPaused = false;
+    let activeMediaType = null;
 
-    // Initialize QR Code on Load
     window.addEventListener('DOMContentLoaded', () => {
-      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(APP_URL)}`;
-      document.getElementById('qrImage').src = qrSrc;
+      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(APP_URL)}`;
+      document.querySelectorAll('.qrImgTag').forEach(img => img.src = qrSrc);
       updateUpNextLabels();
     });
 
-    function toggleFullscreenStage() {
+    function requestNativeFullscreen() {
       const stage = document.getElementById('playerStage');
-      stage.classList.toggle('fullscreen-mode');
+      if (stage.requestFullscreen) {
+        stage.requestFullscreen();
+      } else if (stage.webkitRequestFullscreen) {
+        stage.webkitRequestFullscreen();
+      }
+    }
+
+    function exitNativeFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
     }
 
     function toggleQrOverlay(forceState) {
-      const overlay = document.getElementById('qrOverlay');
-      if (typeof forceState === 'boolean') {
-        overlay.classList.toggle('hidden', !forceState);
-      } else {
-        overlay.classList.toggle('hidden');
-      }
+      const normalOverlay = document.getElementById('normalQrOverlay');
+      const fsOverlay = document.getElementById('fsQrOverlay');
+      
+      const shouldHide = typeof forceState === 'boolean' ? forceState : !normalOverlay.classList.contains('hidden');
+      
+      normalOverlay.classList.toggle('hidden', shouldHide);
+      fsOverlay.classList.toggle('hidden', shouldHide);
     }
 
     function updateUpNextLabels() {
@@ -410,18 +425,16 @@
         const state = ytPlayer.getPlayerState();
         if (state === YT.PlayerState.PLAYING) {
           ytPlayer.pauseVideo();
-          isPaused = true;
         } else {
           ytPlayer.playVideo();
-          isPaused = false;
-          toggleQrOverlay(false);
+          toggleQrOverlay(true);
         }
       } else if (activeMediaType === 'local') {
         const vid = document.getElementById('localVideoEl');
         if (vid) {
           if (vid.paused) {
             vid.play();
-            toggleQrOverlay(false);
+            toggleQrOverlay(true);
           } else {
             vid.pause();
           }
@@ -434,12 +447,12 @@
       ytPlayer = null;
       document.getElementById('npTitle').innerText = 'Interlude — Ready for next singer';
       document.getElementById('mediaMount').innerHTML = '';
-      toggleQrOverlay(true); // Show QR Code during interlude
+      toggleQrOverlay(false); // Show small QR on left / normal interlude screen
     }
 
     function startStream(song) {
       document.getElementById('npTitle').innerText = song.title;
-      toggleQrOverlay(false); // Hide QR code while singing
+      toggleQrOverlay(true); // Hide QR code during active singing
       const mount = document.getElementById('mediaMount');
 
       if (song.type === 'local') {
@@ -454,7 +467,6 @@
           playerVars: { autoplay: 1, playsinline: 1, rel: 0 },
           events: {
             onStateChange: (event) => {
-              // Automatically advance to next queued song when YouTube video ends
               if (event.data === YT.PlayerState.ENDED) {
                 playNext();
               }
