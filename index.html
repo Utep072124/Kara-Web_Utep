@@ -50,26 +50,27 @@
     .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
 
     .stage.custom-fullscreen .fs-next-card {
-      display: flex; flex-direction: column; position: absolute; bottom: 24px; left: 24px;
+      display: flex; flex-direction: column; position: absolute; bottom: 10px; left: 10px;
       background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(0, 210, 255, 0.4);
-      padding: 10px 16px; border-radius: 12px; z-index: 99999; backdrop-filter: blur(6px);
-      max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      padding: 8px 12px; border-radius: 10px; z-index: 99999; backdrop-filter: blur(6px);
+      max-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
     .stage.custom-fullscreen .fs-qr-badge {
-      display: flex; flex-direction: column; align-items: center; position: absolute; top: 20px; right: 20px;
-      background: rgba(255, 255, 255, 0.95); padding: 6px; border-radius: 10px; z-index: 99999;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 65px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; position: absolute; top: 16px; right: 16px;
+      background: rgba(255, 255, 255, 0.95); padding: 5px; border-radius: 8px; z-index: 99999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 60px; text-align: center;
     }
     .stage.custom-fullscreen .fs-exit-btn {
-      display: block; position: absolute; top: 24px; left: 24px; z-index: 99999; pointer-events: auto;
+      display: block; position: absolute; top: 16px; left: 16px; z-index: 99999; pointer-events: auto;
+      padding: 5px 10px; font-size: 0.75rem;
     }
 
-    .fs-next-title { font-size: 0.6rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
-    .fs-next-song { font-size: 0.82rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-    .fs-next-singer { font-size: 0.72rem; color: #cbd5e1; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fs-next-title { font-size: 0.55rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+    .fs-next-song { font-size: 0.78rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .fs-next-singer { font-size: 0.68rem; color: #cbd5e1; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .fs-qr-badge img { width: 55px; height: 55px; display: block; border-radius: 4px; }
-    .fs-qr-label { font-size: 0.45rem; font-weight: 800; color: #111; margin-top: 2px; }
+    .fs-qr-badge img { width: 50px; height: 50px; display: block; border-radius: 4px; }
+    .fs-qr-label { font-size: 0.4rem; font-weight: 800; color: #111; margin-top: 2px; }
 
     /* Normal Mode Interlude / QR Code Screen */
     .qr-overlay-normal {
@@ -135,9 +136,6 @@
 
     /* Controller Mode Specific UI */
     #controllerView { display: none; flex-direction: column; height: 100dvh; }
-    .controller-panel { background: var(--card); padding: 16px; border-bottom: 1px solid #1e293b; text-align: center; }
-    .controller-now { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
-    .controller-controls { display: flex; justify-content: center; gap: 10px; }
   </style>
 </head>
 <body>
@@ -158,7 +156,7 @@
 
     <!-- Video Player Stage -->
     <div class="stage" id="playerStage">
-      <!-- Exit Fullscreen Button -->
+      <!-- Exit Fullscreen Button (Top-Left) -->
       <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
 
       <!-- Bottom-Left "Next Song" Card -->
@@ -192,9 +190,9 @@
         <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
       </div>
       <div class="transport-btns">
-        <button class="btn secondary" onclick="sendControl('playpause')" title="Play/Pause">⏯</button>
-        <button class="btn danger" onclick="sendControl('stop')" title="Stop">⏹</button>
-        <button class="btn" onclick="sendControl('next')" title="Next">⏭</button>
+        <button class="btn secondary" onclick="togglePlayPause()" title="Play/Pause">⏯</button>
+        <button class="btn danger" onclick="stopPlayback()" title="Stop">⏹</button>
+        <button class="btn" onclick="playNext()" title="Next">⏭</button>
       </div>
     </div>
 
@@ -222,19 +220,20 @@
       <div class="brand">GUEST CONTROL QR</div>
       <button class="btn secondary" onclick="exitController()">Exit</button>
     </header>
-    <div class="controller-panel">
-      <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">Now Playing on Host</div>
-      <div class="controller-now" id="ctrlNowPlaying">Loading...</div>
-      <div class="controller-controls">
-        <button class="btn" onclick="sendControl('playpause')">⏯ Play / Pause</button>
-        <button class="btn danger" onclick="sendControl('stop')">⏹ Stop</button>
-        <button class="btn" onclick="sendControl('next')">⏭ Next Song</button>
-      </div>
-    </div>
+
+    <!-- Search Input Bar -->
     <div class="search-bar">
       <input type="text" id="ctrlSearchInput" placeholder="Search song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
       <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
     </div>
+
+    <!-- Controller Tabs -->
+    <div class="tabs">
+      <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Search Results (<span id="ctrlResultCount">0</span>)</div>
+      <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
+    </div>
+
+    <!-- Controller Lists -->
     <div class="list-container" id="ctrlListContainer">
       <div class="placeholder"><p>Search songs to add to queue</p></div>
     </div>
@@ -260,8 +259,11 @@
     let searchResults = [];
     let queue = [];
     let currentTab = 'search';
+    let ctrlTab = 'search';
+    let ctrlSearchResults = [];
     let ytPlayer = null;
     let activeMediaType = null;
+    let isControllerMode = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
@@ -270,33 +272,36 @@
 
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('controller') === 'true') {
+        isControllerMode = true;
         document.getElementById('hostView').style.display = 'none';
         document.getElementById('controllerView').style.display = 'flex';
       }
 
+      // Real-time Queue Listener
       db.ref('queue').on('value', (snapshot) => {
         const data = snapshot.val();
         queue = data ? Object.values(data) : [];
         updateCounts();
         renderList();
-        if (!activeMediaType && queue.length > 0 && !urlParams.get('controller')) {
+        if (isControllerMode) {
+          renderControllerList();
+        }
+        if (!activeMediaType && queue.length > 0 && !isControllerMode) {
           playNext();
         }
       });
 
-      db.ref('state/nowPlaying').on('value', (snapshot) => {
-        const title = snapshot.val() || 'Interlude — Ready';
-        document.getElementById('ctrlNowPlaying').innerText = title;
-      });
-
-      db.ref('state/command').on('value', (snapshot) => {
-        const cmd = snapshot.val();
-        if (!cmd) return;
-        if (cmd === 'playpause') togglePlayPause();
-        if (cmd === 'stop') stopPlayback();
-        if (cmd === 'next') playNext();
-        db.ref('state/command').remove();
-      });
+      // Host listens for remote commands from controllers
+      if (!isControllerMode) {
+        db.ref('state/command').on('value', (snapshot) => {
+          const cmd = snapshot.val();
+          if (!cmd) return;
+          if (cmd === 'playpause') togglePlayPause();
+          if (cmd === 'stop') stopPlayback();
+          if (cmd === 'next') playNext();
+          db.ref('state/command').remove();
+        });
+      }
     });
 
     function openController() {
@@ -336,9 +341,18 @@
       renderList();
     }
 
+    function switchCtrlTab(tab) {
+      ctrlTab = tab;
+      document.getElementById('ctrlTabSearch').classList.toggle('active', tab === 'search');
+      document.getElementById('ctrlTabQueue').classList.toggle('active', tab === 'queue');
+      renderControllerList();
+    }
+
     function updateCounts() {
       document.getElementById('queueCount').innerText = queue.length;
       document.getElementById('resultCount').innerText = searchResults.length;
+      document.getElementById('ctrlQueueCount').innerText = queue.length;
+      document.getElementById('ctrlResultCount').innerText = ctrlSearchResults.length;
       updateUpNextLabels();
     }
 
@@ -378,7 +392,7 @@
         const res = await fetch(url);
         const data = await res.json();
 
-        searchResults = (data.items || []).map(item => ({
+        const mapped = (data.items || []).map(item => ({
           id: item.id.videoId,
           type: 'youtube',
           title: decodeHTML(item.snippet.title),
@@ -387,8 +401,11 @@
         }));
 
         if (isController) {
-          renderControllerSearch();
+          ctrlSearchResults = mapped;
+          switchCtrlTab('search');
+          updateCounts();
         } else {
+          searchResults = mapped;
           switchTab('search');
           updateCounts();
         }
@@ -445,17 +462,43 @@
             <div class="song-artist">${song.channel}</div>
           </div>
           <div class="song-actions">
-            <button class="btn" onclick="promptAndQueue('${song.id}')">+ Queue</button>
+            <button class="btn" onclick="promptAndQueue('${song.id}', false)">+ Queue</button>
           </div>
         `;
         container.appendChild(div);
       });
     }
 
-    function renderControllerSearch() {
+    function renderControllerList() {
       const container = document.getElementById('ctrlListContainer');
       container.innerHTML = '';
-      searchResults.forEach(song => {
+
+      if (ctrlTab === 'queue') {
+        if (queue.length === 0) {
+          container.innerHTML = '<div class="placeholder"><p>Queue is empty.</p></div>';
+          return;
+        }
+        queue.forEach((song, idx) => {
+          const div = document.createElement('div');
+          div.className = 'song-item';
+          div.innerHTML = `
+            ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
+            <div class="song-meta">
+              <div class="song-title">#${idx + 1} • ${song.title}</div>
+              <div class="song-artist">Queue by: ${song.singer || 'Guest'} • ${song.channel}</div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+        return;
+      }
+
+      if (ctrlSearchResults.length === 0) {
+        container.innerHTML = '<div class="placeholder"><p>Search songs to add to queue</p></div>';
+        return;
+      }
+
+      ctrlSearchResults.forEach(song => {
         const div = document.createElement('div');
         div.className = 'song-item';
         div.innerHTML = `
@@ -465,22 +508,24 @@
             <div class="song-artist">${song.channel}</div>
           </div>
           <div class="song-actions">
-            <button class="btn" onclick="promptAndQueue('${song.id}')">Queue</button>
+            <button class="btn" onclick="promptAndQueue('${song.id}', true)">Queue</button>
           </div>
         `;
         container.appendChild(div);
       });
     }
 
-    function promptAndQueue(id) {
+    function promptAndQueue(id, isCtrl) {
       const singer = prompt("Enter Your Name (Optional):", "Guest");
-      if (singer === null) return; // Cancelled
-      const song = searchResults.find(s => s.id === id);
+      if (singer === null) return;
+      const list = isCtrl ? ctrlSearchResults : searchResults;
+      const song = list.find(s => s.id === id);
       if (!song) return;
       
-      song.singer = singer.trim() || 'Guest';
-      db.ref('queue').push(song);
-      alert(`Successfully queued "${song.title}" (Queue by: ${song.singer})`);
+      const songCopy = { ...song };
+      songCopy.singer = singer.trim() || 'Guest';
+      db.ref('queue').push(songCopy);
+      alert(`Successfully queued "${songCopy.title}" (Queue by: ${songCopy.singer})`);
     }
 
     function removeFromFirebaseQueue(index) {
@@ -528,7 +573,6 @@
       activeMediaType = null;
       ytPlayer = null;
       document.getElementById('npTitle').innerText = 'Interlude — Ready';
-      db.ref('state/nowPlaying').set('Interlude — Ready');
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
     }
@@ -536,7 +580,6 @@
     function startStream(song) {
       const displayTitle = `${song.title} (Queue by: ${song.singer || 'Guest'})`;
       document.getElementById('npTitle').innerText = displayTitle;
-      db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
       const mount = document.getElementById('mediaMount');
 
