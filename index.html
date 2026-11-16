@@ -47,33 +47,29 @@
       z-index: 99999; border: none; background: #000;
     }
 
-    /* Overlays for Fullscreen Mode */
-    .fs-top-controls, .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
+    .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
 
-    .stage.custom-fullscreen .fs-top-controls {
-      display: flex; position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-      gap: 12px; z-index: 99999; pointer-events: auto;
-    }
     .stage.custom-fullscreen .fs-next-card {
-      display: flex; flex-direction: column; position: absolute; bottom: 85px; left: 24px;
+      display: flex; flex-direction: column; position: absolute; bottom: 24px; left: 24px;
       background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(0, 210, 255, 0.4);
-      padding: 8px 14px; border-radius: 10px; z-index: 99999; backdrop-filter: blur(6px);
-      max-width: 260px; pointer-events: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      padding: 10px 16px; border-radius: 12px; z-index: 99999; backdrop-filter: blur(6px);
+      max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
     .stage.custom-fullscreen .fs-qr-badge {
-      display: flex; flex-direction: column; align-items: center; position: absolute; top: 50%; right: 24px; transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.95); padding: 8px; border-radius: 12px; z-index: 99999;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 85px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; position: absolute; top: 20px; right: 20px;
+      background: rgba(255, 255, 255, 0.95); padding: 6px; border-radius: 10px; z-index: 99999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 65px; text-align: center;
     }
     .stage.custom-fullscreen .fs-exit-btn {
-      display: block; position: absolute; top: 16px; right: 20px; z-index: 99999; pointer-events: auto;
+      display: block; position: absolute; top: 24px; left: 24px; z-index: 99999; pointer-events: auto;
     }
 
-    .fs-next-title { font-size: 0.65rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
-    .fs-next-song { font-size: 0.82rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fs-next-title { font-size: 0.6rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+    .fs-next-song { font-size: 0.82rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .fs-next-singer { font-size: 0.72rem; color: #cbd5e1; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .fs-qr-badge img { width: 70px; height: 70px; display: block; border-radius: 4px; }
-    .fs-qr-label { font-size: 0.55rem; font-weight: 800; color: #111; margin-top: 3px; }
+    .fs-qr-badge img { width: 55px; height: 55px; display: block; border-radius: 4px; }
+    .fs-qr-label { font-size: 0.45rem; font-weight: 800; color: #111; margin-top: 2px; }
 
     /* Normal Mode Interlude / QR Code Screen */
     .qr-overlay-normal {
@@ -82,9 +78,9 @@
       text-align: center; padding: 16px; z-index: 15;
     }
     .qr-overlay-normal.hidden { display: none; }
-    .qr-overlay-normal img { width: 120px; height: 120px; border-radius: 8px; margin-bottom: 6px; }
+    .qr-overlay-normal img { width: 140px; height: 140px; border-radius: 8px; margin-bottom: 8px; }
 
-    /* Now Playing & Transport Controls */
+    /* Now Playing & Transport Controls Bar */
     .now-playing {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
       padding: 8px 14px; background: var(--card); border-bottom: 1px solid #1e293b;
@@ -136,96 +132,123 @@
     .status-banner {
       background: #1e293b; color: var(--accent); font-size: 0.76rem; padding: 5px 14px; text-align: center;
     }
+
+    /* Controller Mode Specific UI */
+    #controllerView { display: none; flex-direction: column; height: 100dvh; }
+    .controller-panel { background: var(--card); padding: 16px; border-bottom: 1px solid #1e293b; text-align: center; }
+    .controller-now { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .controller-controls { display: flex; justify-content: center; gap: 10px; }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand">KARA-WEB UTEP</div>
-    <div class="header-actions">
-      <input type="file" id="localFileInput" accept="video/mp4,video/quicktime,video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
-      <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ File</button>
-      <button class="btn" onclick="toggleCustomFullscreen()">⛶ Stage</button>
+  <!-- HOST VIEW -->
+  <div id="hostView" style="display:flex; flex-direction:column; height:100dvh;">
+    <header>
+      <div class="brand">KARA-WEB UTEP (HOST)</div>
+      <div class="header-actions">
+        <input type="file" id="localFileInput" accept="video/mp4,video/quicktime,video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
+        <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ File</button>
+        <button class="btn secondary" onclick="openController()">📱 Controller Mode</button>
+        <button class="btn" onclick="toggleCustomFullscreen()">⛶ Stage</button>
+      </div>
+    </header>
+
+    <div id="statusBanner" class="status-banner">Host Stage Ready — Waiting for Queue</div>
+
+    <!-- Video Player Stage -->
+    <div class="stage" id="playerStage">
+      <!-- Exit Fullscreen Button -->
+      <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
+
+      <!-- Bottom-Left "Next Song" Card -->
+      <div class="fs-next-card">
+        <div class="fs-next-title">Next song</div>
+        <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
+        <div class="fs-next-singer" id="fsNextSingerName"></div>
+      </div>
+
+      <!-- Right-Side Small QR Badge (~4% size) Named Guest Control QR -->
+      <div class="fs-qr-badge">
+        <img class="qrImgTag" alt="Scan QR" />
+        <div class="fs-qr-label">GUEST QR</div>
+      </div>
+
+      <!-- Normal Mode Interlude / QR Code Screen -->
+      <div class="qr-overlay-normal" id="normalQrOverlay">
+        <img class="qrImgTag" alt="Scan to Open Kara-Web Utep" />
+        <div style="font-weight:700; font-size:1rem; color:#fff; margin-top:6px;">Scan Guest Control QR to Reserve</div>
+        <div style="font-size:0.8rem; color:var(--accent);">utep072124.github.io/Kara-Web_Utep</div>
+      </div>
+
+      <!-- Active Video Container -->
+      <div id="mediaMount" style="width:100%; height:100%;"></div>
     </div>
-  </header>
 
-  <div id="statusBanner" class="status-banner">Connected to Live Firebase Queue</div>
-
-  <!-- Video Player Stage -->
-  <div class="stage" id="playerStage">
-    
-    <!-- Top Floating Controls -->
-    <div class="fs-top-controls">
-      <button class="btn glass" onclick="togglePlayPause()" title="Play/Pause">▶ Play/Pause</button>
-      <button class="btn glass" onclick="playNext()" title="Next Song">⏭ Next</button>
+    <!-- Now Playing & Transport Controls -->
+    <div class="now-playing">
+      <div class="np-info">
+        <span class="np-title" id="npTitle">No song playing</span>
+        <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
+      </div>
+      <div class="transport-btns">
+        <button class="btn secondary" onclick="sendControl('playpause')" title="Play/Pause">⏯</button>
+        <button class="btn danger" onclick="sendControl('stop')" title="Stop">⏹</button>
+        <button class="btn" onclick="sendControl('next')" title="Next">⏭</button>
+      </div>
     </div>
 
-    <!-- Exit Fullscreen Button -->
-    <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit</button>
-
-    <!-- Bottom-Left "Next Song" Card -->
-    <div class="fs-next-card">
-      <div class="fs-next-title">Next song</div>
-      <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
+    <!-- Search Input Bar -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+      <button class="btn" onclick="searchYouTube()">Search</button>
     </div>
 
-    <!-- Right-Side Small QR Badge -->
-    <div class="fs-qr-badge">
-      <img class="qrImgTag" alt="Scan QR" />
-      <div class="fs-qr-label">SCAN QR</div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
+      <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
     </div>
 
-    <!-- Normal Mode Interlude / QR Code Screen -->
-    <div class="qr-overlay-normal" id="normalQrOverlay">
-      <img class="qrImgTag" alt="Scan to Open Kara-Web Utep" />
-      <div style="font-weight:700; font-size:0.9rem; color:#fff; margin-top:4px;">Scan to Reserve Songs</div>
-      <div style="font-size:0.75rem; color:var(--accent);">utep072124.github.io/Kara-Web_Utep</div>
+    <!-- Lists -->
+    <div class="list-container" id="listContainer">
+      <div class="placeholder"><p>Type a song above and tap Search</p></div>
     </div>
-
-    <!-- Active Video Container -->
-    <div id="mediaMount" style="width:100%; height:100%;"></div>
   </div>
 
-  <!-- Now Playing & Transport Controls -->
-  <div class="now-playing">
-    <div class="np-info">
-      <span class="np-title" id="npTitle">No song playing</span>
-      <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
+  <!-- REMOTE CONTROLLER VIEW -->
+  <div id="controllerView">
+    <header>
+      <div class="brand">GUEST CONTROL QR</div>
+      <button class="btn secondary" onclick="exitController()">Exit</button>
+    </header>
+    <div class="controller-panel">
+      <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">Now Playing on Host</div>
+      <div class="controller-now" id="ctrlNowPlaying">Loading...</div>
+      <div class="controller-controls">
+        <button class="btn" onclick="sendControl('playpause')">⏯ Play / Pause</button>
+        <button class="btn danger" onclick="sendControl('stop')">⏹ Stop</button>
+        <button class="btn" onclick="sendControl('next')">⏭ Next Song</button>
+      </div>
     </div>
-    <div class="transport-btns">
-      <button class="btn secondary" onclick="togglePlayPause()" title="Play/Pause">⏯</button>
-      <button class="btn danger" onclick="stopPlayback()" title="Stop">⏹</button>
-      <button class="btn" onclick="playNext()" title="Next">⏭</button>
+    <div class="search-bar">
+      <input type="text" id="ctrlSearchInput" placeholder="Search song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
+      <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
     </div>
-  </div>
-
-  <!-- Search Input Bar -->
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
-    <button class="btn" onclick="searchYouTube()">Search</button>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
-    <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
-  </div>
-
-  <!-- Lists -->
-  <div class="list-container" id="listContainer">
-    <div class="placeholder"><p>Type a song above and tap Search</p></div>
+    <div class="list-container" id="ctrlListContainer">
+      <div class="placeholder"><p>Search songs to add to queue</p></div>
+    </div>
   </div>
 
   <script>
-    // Firebase Configuration from your console
     const firebaseConfig = {
       apiKey: "AIzaSyC3-msJLDu3KJu-esrUNNULw6n12",
       authDomain: "kara-web-395f1.firebaseapp.com",
       databaseURL: "https://kara-web-395f1-default-rtdb.firebaseio.com",
       projectId: "kara-web-395f1",
       storageBucket: "kara-web-395f1.appspot.com",
-      messagingSenderId: "kara-web-395f1_msg",
-      appId: "1:kara-web-395f1:web:app"
+      messagingSenderId: "967567405319",
+      appId: "1:967567405319:web:b994d767b0805b8"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -241,22 +264,52 @@
     let activeMediaType = null;
 
     window.addEventListener('DOMContentLoaded', () => {
-      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(APP_URL)}`;
+      const controllerUrl = APP_URL + '?controller=true';
+      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(controllerUrl)}`;
       document.querySelectorAll('.qrImgTag').forEach(img => img.src = qrSrc);
 
-      // Listen to Firebase Queue changes in Real-Time
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('controller') === 'true') {
+        document.getElementById('hostView').style.display = 'none';
+        document.getElementById('controllerView').style.display = 'flex';
+      }
+
       db.ref('queue').on('value', (snapshot) => {
         const data = snapshot.val();
         queue = data ? Object.values(data) : [];
         updateCounts();
         renderList();
-        
-        // If nothing is playing and songs are in the queue, start playing automatically!
-        if (!activeMediaType && queue.length > 0) {
+        if (!activeMediaType && queue.length > 0 && !urlParams.get('controller')) {
           playNext();
         }
       });
+
+      db.ref('state/nowPlaying').on('value', (snapshot) => {
+        const title = snapshot.val() || 'Interlude — Ready';
+        document.getElementById('ctrlNowPlaying').innerText = title;
+      });
+
+      db.ref('state/command').on('value', (snapshot) => {
+        const cmd = snapshot.val();
+        if (!cmd) return;
+        if (cmd === 'playpause') togglePlayPause();
+        if (cmd === 'stop') stopPlayback();
+        if (cmd === 'next') playNext();
+        db.ref('state/command').remove();
+      });
     });
+
+    function openController() {
+      window.open(APP_URL + '?controller=true', '_blank');
+    }
+
+    function exitController() {
+      window.location.href = APP_URL;
+    }
+
+    function sendControl(action) {
+      db.ref('state/command').set(action);
+    }
 
     function toggleCustomFullscreen() {
       const stage = document.getElementById('playerStage');
@@ -264,9 +317,16 @@
     }
 
     function updateUpNextLabels() {
-      const nextText = queue.length > 0 ? `"${queue[0].title}"` : '"No song reserved"';
-      document.getElementById('fsNextSongName').innerText = nextText;
-      document.getElementById('npNextMini').innerText = `Up Next: ${queue.length > 0 ? queue[0].title : 'Queue is empty'}`;
+      if (queue.length > 0) {
+        const nextSong = queue[0];
+        document.getElementById('fsNextSongName').innerText = `"${nextSong.title}"`;
+        document.getElementById('fsNextSingerName').innerText = `Queue by: ${nextSong.singer || 'Guest'}`;
+        document.getElementById('npNextMini').innerText = `Up Next: ${nextSong.title} (Queue by: ${nextSong.singer || 'Guest'})`;
+      } else {
+        document.getElementById('fsNextSongName').innerText = '"No song reserved"';
+        document.getElementById('fsNextSingerName').innerText = '';
+        document.getElementById('npNextMini').innerText = 'Up Next: Queue is empty';
+      }
     }
 
     function switchTab(tab) {
@@ -291,12 +351,11 @@
         type: 'local',
         url: URL.createObjectURL(file),
         title: file.name.replace(/\.[^/.]+$/, ''),
-        channel: 'Local MP4/MOV File',
+        channel: 'Local File',
         thumbnail: ''
       }));
 
       searchResults = [...localSongs, ...searchResults];
-      document.getElementById('statusBanner').innerText = `Loaded ${files.length} local file(s)`;
       switchTab('search');
       updateCounts();
     }
@@ -304,19 +363,20 @@
     async function searchYouTube() {
       const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
+      fetchResults(query, false);
+    }
 
-      const banner = document.getElementById('statusBanner');
-      banner.innerText = 'Searching YouTube...';
+    async function ctrlSearchYouTube() {
+      const query = document.getElementById('ctrlSearchInput').value.trim();
+      if (!query) return;
+      fetchResults(query, true);
+    }
 
+    async function fetchResults(query, isController) {
       try {
         const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(query + ' karaoke')}&key=${YOUTUBE_API_KEY}`;
         const res = await fetch(url);
         const data = await res.json();
-
-        if (data.error) {
-          banner.innerText = 'API Error: ' + data.error.message;
-          return;
-        }
 
         searchResults = (data.items || []).map(item => ({
           id: item.id.videoId,
@@ -326,11 +386,14 @@
           thumbnail: item.snippet.thumbnails.default.url
         }));
 
-        banner.innerText = `Found ${searchResults.length} karaoke videos`;
-        switchTab('search');
-        updateCounts();
+        if (isController) {
+          renderControllerSearch();
+        } else {
+          switchTab('search');
+          updateCounts();
+        }
       } catch (err) {
-        banner.innerText = 'Network error: ' + err.message;
+        console.error(err);
       }
     }
 
@@ -346,7 +409,7 @@
 
       if (currentTab === 'queue') {
         if (queue.length === 0) {
-          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Reserve a song!</p></div>';
+          container.innerHTML = '<div class="placeholder"><p>Queue is empty.</p></div>';
           return;
         }
         queue.forEach((song, idx) => {
@@ -356,10 +419,9 @@
             ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
             <div class="song-meta">
               <div class="song-title">#${idx + 1} • ${song.title}</div>
-              <div class="song-artist">${song.channel}</div>
+              <div class="song-artist">Queue by: ${song.singer || 'Guest'} • ${song.channel}</div>
             </div>
             <div class="song-actions">
-              <button class="btn" onclick="playSpecificFirebase(${idx})">Play</button>
               <button class="btn danger" onclick="removeFromFirebaseQueue(${idx})">✕</button>
             </div>
           `;
@@ -369,7 +431,7 @@
       }
 
       if (searchResults.length === 0) {
-        container.innerHTML = '<div class="placeholder"><p>No results yet. Search above or tap "+ File"</p></div>';
+        container.innerHTML = '<div class="placeholder"><p>No results yet.</p></div>';
         return;
       }
 
@@ -383,42 +445,51 @@
             <div class="song-artist">${song.channel}</div>
           </div>
           <div class="song-actions">
-            <button class="btn secondary" onclick="playById('${song.id}')">Play</button>
-            <button class="btn" onclick="addToFirebaseQueue('${song.id}')">+ Queue</button>
+            <button class="btn" onclick="promptAndQueue('${song.id}')">+ Queue</button>
           </div>
         `;
         container.appendChild(div);
       });
     }
 
-    // Firebase Queue Actions (Real-Time Sync)
-    function addToFirebaseQueue(id) {
-      const song = searchResults.find(s => s.id === id);
-      if (!song) return;
-      db.ref('queue').push(song);
-    }
-
-    function removeFromFirebaseQueue(index) {
-      // Fetch current queue keys snapshot to remove exact item
-      db.ref('queue').once('value', (snapshot) => {
-        const val = snapshot.val();
-        if (!val) return;
-        const keys = Object.keys(val);
-        if (keys[index]) {
-          db.ref('queue/' + keys[index]).remove();
-        }
+    function renderControllerSearch() {
+      const container = document.getElementById('ctrlListContainer');
+      container.innerHTML = '';
+      searchResults.forEach(song => {
+        const div = document.createElement('div');
+        div.className = 'song-item';
+        div.innerHTML = `
+          ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
+          <div class="song-meta">
+            <div class="song-title">${song.title}</div>
+            <div class="song-artist">${song.channel}</div>
+          </div>
+          <div class="song-actions">
+            <button class="btn" onclick="promptAndQueue('${song.id}')">Queue</button>
+          </div>
+        `;
+        container.appendChild(div);
       });
     }
 
-    function playSpecificFirebase(index) {
+    function promptAndQueue(id) {
+      const singer = prompt("Enter Your Name (Optional):", "Guest");
+      if (singer === null) return; // Cancelled
+      const song = searchResults.find(s => s.id === id);
+      if (!song) return;
+      
+      song.singer = singer.trim() || 'Guest';
+      db.ref('queue').push(song);
+      alert(`Successfully queued "${song.title}" (Queue by: ${song.singer})`);
+    }
+
+    function removeFromFirebaseQueue(index) {
       db.ref('queue').once('value', (snapshot) => {
         const val = snapshot.val();
         if (!val) return;
         const keys = Object.keys(val);
         if (keys[index]) {
-          const song = val[keys[index]];
           db.ref('queue/' + keys[index]).remove();
-          startStream(song);
         }
       });
     }
@@ -433,22 +504,14 @@
         const keys = Object.keys(val);
         const firstKey = keys[0];
         const nextSong = val[firstKey];
-        
-        // Remove from Firebase queue once played
         db.ref('queue/' + firstKey).remove();
         startStream(nextSong);
       });
     }
 
-    function playById(id) {
-      const song = searchResults.find(s => s.id === id);
-      if (song) startStream(song);
-    }
-
     function togglePlayPause() {
       if (activeMediaType === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-        const state = ytPlayer.getPlayerState();
-        if (state === YT.PlayerState.PLAYING) {
+        if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
           ytPlayer.pauseVideo();
         } else {
           ytPlayer.playVideo();
@@ -456,11 +519,7 @@
       } else if (activeMediaType === 'local') {
         const vid = document.getElementById('localVideoEl');
         if (vid) {
-          if (vid.paused) {
-            vid.play();
-          } else {
-            vid.pause();
-          }
+          if (vid.paused) vid.play(); else vid.pause();
         }
       }
     }
@@ -468,13 +527,16 @@
     function stopPlayback() {
       activeMediaType = null;
       ytPlayer = null;
-      document.getElementById('npTitle').innerText = 'Interlude — Ready for next singer';
+      document.getElementById('npTitle').innerText = 'Interlude — Ready';
+      db.ref('state/nowPlaying').set('Interlude — Ready');
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
     }
 
     function startStream(song) {
-      document.getElementById('npTitle').innerText = song.title;
+      const displayTitle = `${song.title} (Queue by: ${song.singer || 'Guest'})`;
+      document.getElementById('npTitle').innerText = displayTitle;
+      db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
       const mount = document.getElementById('mediaMount');
 
