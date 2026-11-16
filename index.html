@@ -6,7 +6,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Kara-Web Utep</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg: #0b0f19;
@@ -25,13 +24,7 @@
       padding: 12px 16px; background: #0f1524; border-bottom: 1px solid #1e293b;
     }
     .brand { font-weight: 800; font-size: 1.1rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .btn {
-      background: linear-gradient(135deg, var(--accent), #0284c7); color: #fff; border: none;
-      padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
-    }
-    .btn.secondary { background: #1e293b; color: var(--text); }
-    .btn.danger { background: #dc2626; }
-
+    
     /* Video Stage */
     .stage {
       position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 38dvh;
@@ -48,14 +41,19 @@
       padding: 10px 16px; background: var(--card); border-bottom: 1px solid #1e293b;
     }
     .np-info { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .np-code { color: var(--accent); font-weight: 700; margin-right: 6px; font-family: monospace; font-size: 0.95rem; }
     .np-title { font-weight: 600; font-size: 0.9rem; }
+    .btn {
+      background: linear-gradient(135deg, var(--accent), #0284c7); color: #fff; border: none;
+      padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+    }
+    .btn.secondary { background: #1e293b; color: var(--text); }
+    .btn.danger { background: #dc2626; }
 
-    /* Keypad Input Bar */
-    .keypad-bar {
+    /* Search Bar */
+    .search-bar {
       display: flex; gap: 8px; padding: 10px 16px; background: #0f1524; border-bottom: 1px solid #1e293b;
     }
-    .keypad-bar input {
+    .search-bar input {
       flex: 1; background: #1e293b; border: 1px solid #334155; color: #fff;
       padding: 10px 12px; border-radius: 10px; font-size: 1rem; outline: none;
     }
@@ -63,7 +61,7 @@
     /* Tabs */
     .tabs { display: flex; background: #0f1524; border-bottom: 1px solid #1e293b; }
     .tab {
-      flex: 1; text-align: center; padding: 10px; font-weight: 600; font-size: 0.9rem;
+      flex: 1; text-align: center; padding: 10px; font-weight: 600; font-size: 0.85rem;
       color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
     }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -72,17 +70,17 @@
     .list-container { flex: 1; overflow-y: auto; padding: 10px 16px 30px; }
     .song-item {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 8px;
+      background: var(--card); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;
       border: 1px solid #1e293b;
     }
-    .song-meta { overflow: hidden; }
-    .song-code { font-family: monospace; color: var(--accent); font-weight: 700; font-size: 0.9rem; }
-    .song-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .song-artist { font-size: 0.8rem; color: var(--muted); }
+    .song-thumb { width: 60px; height: 45px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
+    .song-meta { overflow: hidden; flex: 1; }
+    .song-title { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .song-artist { font-size: 0.75rem; color: var(--muted); }
     .song-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
     .status-banner {
-      background: #1e293b; color: var(--accent); font-size: 0.8rem; padding: 8px 16px; text-align: center;
+      background: #1e293b; color: var(--accent); font-size: 0.8rem; padding: 6px 16px; text-align: center;
     }
   </style>
 </head>
@@ -90,165 +88,110 @@
 
   <header>
     <div class="brand">KARA-WEB UTEP</div>
-    <button id="authBtn" class="btn" onclick="handleAuthClick()">Connect Drive</button>
+    <div style="font-size: 0.75rem; color: var(--muted);">YouTube Mode Active</div>
   </header>
 
-  <div id="statusBanner" class="status-banner">Tap "Connect Drive" to load your _USRDAT songbook</div>
+  <div id="statusBanner" class="status-banner">Search YouTube for karaoke tracks instantly!</div>
 
   <!-- Video Player Stage -->
   <div class="stage" id="playerStage">
     <div class="placeholder">
       <h3>Ready to Sing</h3>
-      <p>Enter a 5-digit song code or pick a track below</p>
+      <p>Search or select a song below</p>
     </div>
   </div>
 
   <!-- Now Playing Controls -->
   <div class="now-playing">
     <div class="np-info">
-      <span class="np-code" id="npCode">-----</span>
       <span class="np-title" id="npTitle">No song playing</span>
     </div>
     <button class="btn secondary" onclick="playNext()">Next ⏭</button>
   </div>
 
-  <!-- Search / Code Entry -->
-  <div class="keypad-bar">
-    <input type="text" id="searchInput" placeholder="Search song, artist, or 5-digit code..." oninput="renderSongs()" />
-    <button class="btn" onclick="reserveByCode()">Reserve</button>
+  <!-- Search Input Bar -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Type song name + karaoke (e.g., My Way karaoke)..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+    <button class="btn" onclick="searchYouTube()">Search</button>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
-    <div class="tab active" id="tabSongs" onclick="switchTab('songs')">Songbook (<span id="songCount">0</span>)</div>
+    <div class="tab active" id="tabSearch" onclick="switchTab('search')">Search Results</div>
     <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
   </div>
 
   <!-- Lists -->
-  <div class="list-container" id="listContainer"></div>
+  <div class="list-container" id="listContainer">
+    <div class="placeholder"><p>Type a song above and tap Search</p></div>
+  </div>
 
   <script>
-    // Your Google Cloud & Drive Configuration
-    const CLIENT_ID = '369493536817-6bp9tpahjnlpg0vclomful0bj7vegit1.apps.googleusercontent.com';
-    const FOLDER_ID = '1M129iMUrGbxsEjlNHv206OL1pvNDe4QP';
-    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
-
-    let tokenClient;
-    let accessToken = null;
-    let songs = [];
+    let searchResults = [];
     let queue = [];
-    let currentTab = 'songs';
-
-    window.onload = () => {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            accessToken = tokenResponse.access_token;
-            document.getElementById('authBtn').innerText = 'Sync Drive';
-            fetchAllDriveFiles();
-          }
-        },
-      });
-    };
-
-    function handleAuthClick() {
-      tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
-    }
-
-    async function fetchAllDriveFiles() {
-      const banner = document.getElementById('statusBanner');
-      banner.innerText = 'Loading songs from Google Drive...';
-      songs = [];
-      let pageToken = null;
-
-      try {
-        do {
-          const query = encodeURIComponent(`'${FOLDER_ID}' in parents and trashed = false`);
-          let url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=nextPageToken,files(id,name)&pageSize=1000&orderBy=name`;
-          if (pageToken) url += `&pageToken=${pageToken}`;
-
-          const res = await fetch(url, {
-            headers: { Authorization: `Bearer ${accessToken}` }
-          });
-          const data = await res.json();
-
-          if (data.error) {
-            banner.innerText = 'Drive Error: ' + data.error.message;
-            return;
-          }
-
-          if (data.files) {
-            data.files.forEach((file) => {
-              if (file.name.match(/\.(avi|mp4|mkv|mov)$/i)) {
-                songs.push(parseFilename(file));
-              }
-            });
-          }
-
-          pageToken = data.nextPageToken;
-          banner.innerText = `Loaded ${songs.length} songs...`;
-        } while (pageToken);
-
-        songs.sort((a, b) => a.code.localeCompare(b.code));
-        banner.innerText = `Connected! ${songs.length} songs ready in _USRDAT`;
-        updateCounts();
-        renderSongs();
-      } catch (err) {
-        banner.innerText = 'Failed to load files: ' + err.message;
-      }
-    }
-
-    function parseFilename(file) {
-      // Matches format: 47001-34+35 - Ariana ft Doja, Megan.avi
-      const cleanName = file.name.replace(/\.[^/.]+$/, '');
-      const match = cleanName.match(/^(\d{4,6})-(.+)$/);
-      let code = '00000';
-      let rest = cleanName;
-
-      if (match) {
-        code = match[1];
-        rest = match[2].trim();
-      }
-
-      const parts = rest.split(' - ');
-      const title = parts[0] ? parts[0].trim() : rest;
-      const artist = parts.length > 1 ? parts.slice(1).join(' - ').trim() : 'Karaoke Track';
-
-      return { id: file.id, code, title, artist, raw: cleanName };
-    }
+    let currentTab = 'search';
 
     function switchTab(tab) {
       currentTab = tab;
-      document.getElementById('tabSongs').classList.toggle('active', tab === 'songs');
+      document.getElementById('tabSearch').classList.toggle('active', tab === 'search');
       document.getElementById('tabQueue').classList.toggle('active', tab === 'queue');
-      renderSongs();
+      renderList();
     }
 
     function updateCounts() {
-      document.getElementById('songCount').innerText = songs.length;
       document.getElementById('queueCount').innerText = queue.length;
     }
 
-    function renderSongs() {
+    async function searchYouTube() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      const banner = document.getElementById('statusBanner');
+      banner.innerText = 'Searching YouTube...';
+
+      try {
+        // Using public Invidious / piped instances or direct YouTube JSON API fallback via client
+        // For a reliable client-side search without a backend server, we can query YouTube's RSS/OEmbed or public APIs, 
+        // or let users search easily. Let's use a robust public search endpoint or RSS feed:
+        const res = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query + ' karaoke')}&filter=videos`);
+        const data = await res.json();
+        
+        if (data && data.items) {
+          searchResults = data.items.map(item => ({
+            id: item.url.replace('/watch?v=', ''),
+            title: item.title,
+            channel: item.uploaderName,
+            thumbnail: item.thumbnail
+          }));
+        } else {
+          searchResults = [];
+        }
+
+        banner.innerText = `Found ${searchResults.length} karaoke videos`;
+        switchTab('search');
+      } catch (err) {
+        // Fallback or direct search helper if API is blocked
+        banner.innerText = 'Search error. Try another keyword.';
+      }
+    }
+
+    function renderList() {
       const container = document.getElementById('listContainer');
-      const term = document.getElementById('searchInput').value.toLowerCase().trim();
       container.innerHTML = '';
 
       if (currentTab === 'queue') {
         if (queue.length === 0) {
-          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Reserve a song!</p></div>';
+          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Search and add songs!</p></div>';
           return;
         }
         queue.forEach((song, idx) => {
           const div = document.createElement('div');
           div.className = 'song-item';
           div.innerHTML = `
+            <img class="song-thumb" src="${song.thumbnail || ''}" />
             <div class="song-meta">
-              <div class="song-code">#${idx + 1} • ${song.code}</div>
               <div class="song-title">${song.title}</div>
-              <div class="song-artist">${song.artist}</div>
+              <div class="song-artist">${song.channel}</div>
             </div>
             <div class="song-actions">
               <button class="btn" onclick="playSpecific(${idx})">Play</button>
@@ -260,24 +203,22 @@
         return;
       }
 
-      const filtered = songs.filter(s =>
-        s.code.includes(term) ||
-        s.title.toLowerCase().includes(term) ||
-        s.artist.toLowerCase().includes(term)
-      );
+      if (searchResults.length === 0) {
+        container.innerHTML = '<div class="placeholder"><p>No results yet. Type a song above!</p></div>';
+        return;
+      }
 
-      // Render max 150 items at a time for smooth iOS scrolling
-      filtered.slice(0, 150).forEach(song => {
+      searchResults.forEach(song => {
         const div = document.createElement('div');
         div.className = 'song-item';
         div.innerHTML = `
+          <img class="song-thumb" src="${song.thumbnail || ''}" />
           <div class="song-meta">
-            <div class="song-code">${song.code}</div>
             <div class="song-title">${song.title}</div>
-            <div class="song-artist">${song.artist}</div>
+            <div class="song-artist">${song.channel}</div>
           </div>
           <div class="song-actions">
-            <button class="btn secondary" onclick="playNow('${song.id}')">Play</button>
+            <button class="btn secondary" onclick="playNow('${song.id}', '${encodeURIComponent(song.title)}')">Play</button>
             <button class="btn" onclick="addToQueue('${song.id}')">+ Queue</button>
           </div>
         `;
@@ -285,61 +226,45 @@
       });
     }
 
-    function addToQueue(fileId) {
-      const song = songs.find(s => s.id === fileId);
+    function addToQueue(videoId) {
+      const song = searchResults.find(s => s.id === videoId);
       if (!song) return;
       queue.push(song);
       updateCounts();
-      if (document.getElementById('npCode').innerText === '-----') {
+      if (document.getElementById('npTitle').innerText === 'No song playing') {
         playNext();
-      }
-    }
-
-    function reserveByCode() {
-      const input = document.getElementById('searchInput');
-      const code = input.value.trim();
-      const song = songs.find(s => s.code === code);
-      if (song) {
-        addToQueue(song.id);
-        input.value = '';
-        renderSongs();
-      } else {
-        alert('Song code not found: ' + code);
       }
     }
 
     function removeFromQueue(index) {
       queue.splice(index, 1);
       updateCounts();
-      renderSongs();
+      renderList();
     }
 
     function playSpecific(index) {
       const [song] = queue.splice(index, 1);
       updateCounts();
-      renderSongs();
-      startStream(song);
+      renderList();
+      startStream(song.id, song.title);
     }
 
     function playNext() {
       if (queue.length === 0) return;
       const nextSong = queue.shift();
       updateCounts();
-      renderSongs();
-      startStream(nextSong);
+      renderList();
+      startStream(nextSong.id, nextSong.title);
     }
 
-    function playNow(fileId) {
-      const song = songs.find(s => s.id === fileId);
-      if (song) startStream(song);
+    function playNow(videoId, encodedTitle) {
+      startStream(videoId, decodeURIComponent(encodedTitle));
     }
 
-    function startStream(song) {
-      document.getElementById('npCode').innerText = song.code;
-      document.getElementById('npTitle').innerText = `${song.title} - ${song.artist}`;
+    function startStream(videoId, title) {
+      document.getElementById('npTitle').innerText = title;
       const stage = document.getElementById('playerStage');
-      // Uses Google Drive's native web preview transcoder for .avi playback on iOS
-      stage.innerHTML = `<iframe src="https://drive.google.com/file/d/${song.id}/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      stage.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
     }
   </script>
 </body>
