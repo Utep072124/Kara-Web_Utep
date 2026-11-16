@@ -8,7 +8,12 @@
   <link rel="apple-touch-icon" href="icon.jpg" />
   <link rel="icon" type="image/jpeg" href="icon.jpg" />
   <title>Kara-Web Utep</title>
+  
+  <!-- YouTube API & Firebase Compat SDKs -->
   <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --bg: #0b0f19;
@@ -36,13 +41,13 @@
     }
     #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: auto; }
 
-    /* Custom Fullscreen Stage Mode (Matches your mockup layout perfectly) */
+    /* Custom Fullscreen Stage Mode */
     .stage.custom-fullscreen {
       position: fixed; inset: 0; width: 100vw; height: 100dvh; max-height: none;
       z-index: 99999; border: none; background: #000;
     }
 
-    /* Overlays (Hidden in normal mode, active in Custom Fullscreen) */
+    /* Overlays for Fullscreen Mode */
     .fs-top-controls, .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
 
     .stage.custom-fullscreen .fs-top-controls {
@@ -64,7 +69,6 @@
       display: block; position: absolute; top: 16px; right: 20px; z-index: 99999; pointer-events: auto;
     }
 
-    /* Mockup-style UI Elements */
     .fs-next-title { font-size: 0.65rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
     .fs-next-song { font-size: 0.82rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
@@ -145,12 +149,12 @@
     </div>
   </header>
 
-  <div id="statusBanner" class="status-banner">Scan QR to open Songbook on any phone</div>
+  <div id="statusBanner" class="status-banner">Connected to Live Firebase Queue</div>
 
   <!-- Video Player Stage -->
   <div class="stage" id="playerStage">
     
-    <!-- Top Floating Controls (Play & Next) -->
+    <!-- Top Floating Controls -->
     <div class="fs-top-controls">
       <button class="btn glass" onclick="togglePlayPause()" title="Play/Pause">▶ Play/Pause</button>
       <button class="btn glass" onclick="playNext()" title="Next Song">⏭ Next</button>
@@ -159,13 +163,13 @@
     <!-- Exit Fullscreen Button -->
     <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit</button>
 
-    <!-- Bottom-Left "Next Song" Card (Matching Mockup) -->
+    <!-- Bottom-Left "Next Song" Card -->
     <div class="fs-next-card">
       <div class="fs-next-title">Next song</div>
       <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
     </div>
 
-    <!-- Right-Side Small QR Badge (~5% area) -->
+    <!-- Right-Side Small QR Badge -->
     <div class="fs-qr-badge">
       <img class="qrImgTag" alt="Scan QR" />
       <div class="fs-qr-label">SCAN QR</div>
@@ -213,6 +217,20 @@
   </div>
 
   <script>
+    // Firebase Configuration from your console
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3-msJLDu3KJu-esrUNNULw6n12",
+      authDomain: "kara-web-395f1.firebaseapp.com",
+      databaseURL: "https://kara-web-395f1-default-rtdb.firebaseio.com",
+      projectId: "kara-web-395f1",
+      storageBucket: "kara-web-395f1.appspot.com",
+      messagingSenderId: "kara-web-395f1_msg",
+      appId: "1:kara-web-395f1:web:app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const YOUTUBE_API_KEY = 'AIzaSyDBaE3nXzMESrJslYhZsn4ssGUOpVS1WZI';
     const APP_URL = 'https://utep072124.github.io/Kara-Web_Utep/';
 
@@ -225,7 +243,19 @@
     window.addEventListener('DOMContentLoaded', () => {
       const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(APP_URL)}`;
       document.querySelectorAll('.qrImgTag').forEach(img => img.src = qrSrc);
-      updateUpNextLabels();
+
+      // Listen to Firebase Queue changes in Real-Time
+      db.ref('queue').on('value', (snapshot) => {
+        const data = snapshot.val();
+        queue = data ? Object.values(data) : [];
+        updateCounts();
+        renderList();
+        
+        // If nothing is playing and songs are in the queue, start playing automatically!
+        if (!activeMediaType && queue.length > 0) {
+          playNext();
+        }
+      });
     });
 
     function toggleCustomFullscreen() {
@@ -329,8 +359,8 @@
               <div class="song-artist">${song.channel}</div>
             </div>
             <div class="song-actions">
-              <button class="btn" onclick="playSpecific(${idx})">Play</button>
-              <button class="btn danger" onclick="removeFromQueue(${idx})">✕</button>
+              <button class="btn" onclick="playSpecificFirebase(${idx})">Play</button>
+              <button class="btn danger" onclick="removeFromFirebaseQueue(${idx})">✕</button>
             </div>
           `;
           container.appendChild(div);
@@ -354,45 +384,60 @@
           </div>
           <div class="song-actions">
             <button class="btn secondary" onclick="playById('${song.id}')">Play</button>
-            <button class="btn" onclick="addToQueue('${song.id}')">+ Queue</button>
+            <button class="btn" onclick="addToFirebaseQueue('${song.id}')">+ Queue</button>
           </div>
         `;
         container.appendChild(div);
       });
     }
 
-    function addToQueue(id) {
+    // Firebase Queue Actions (Real-Time Sync)
+    function addToFirebaseQueue(id) {
       const song = searchResults.find(s => s.id === id);
       if (!song) return;
-      queue.push(song);
-      updateCounts();
-      if (!activeMediaType) {
-        playNext();
-      }
+      db.ref('queue').push(song);
     }
 
-    function removeFromQueue(index) {
-      queue.splice(index, 1);
-      updateCounts();
-      renderList();
+    function removeFromFirebaseQueue(index) {
+      // Fetch current queue keys snapshot to remove exact item
+      db.ref('queue').once('value', (snapshot) => {
+        const val = snapshot.val();
+        if (!val) return;
+        const keys = Object.keys(val);
+        if (keys[index]) {
+          db.ref('queue/' + keys[index]).remove();
+        }
+      });
     }
 
-    function playSpecific(index) {
-      const [song] = queue.splice(index, 1);
-      updateCounts();
-      renderList();
-      startStream(song);
+    function playSpecificFirebase(index) {
+      db.ref('queue').once('value', (snapshot) => {
+        const val = snapshot.val();
+        if (!val) return;
+        const keys = Object.keys(val);
+        if (keys[index]) {
+          const song = val[keys[index]];
+          db.ref('queue/' + keys[index]).remove();
+          startStream(song);
+        }
+      });
     }
 
     function playNext() {
-      if (queue.length === 0) {
-        stopPlayback();
-        return;
-      }
-      const nextSong = queue.shift();
-      updateCounts();
-      renderList();
-      startStream(nextSong);
+      db.ref('queue').once('value', (snapshot) => {
+        const val = snapshot.val();
+        if (!val) {
+          stopPlayback();
+          return;
+        }
+        const keys = Object.keys(val);
+        const firstKey = keys[0];
+        const nextSong = val[firstKey];
+        
+        // Remove from Firebase queue once played
+        db.ref('queue/' + firstKey).remove();
+        startStream(nextSong);
+      });
     }
 
     function playById(id) {
