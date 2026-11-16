@@ -25,13 +25,13 @@
       padding: 12px 16px; background: #0f1524; border-bottom: 1px solid #1e293b;
     }
     .brand { font-weight: 800; font-size: 1.1rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
+
     .stage {
       position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 38dvh;
       background: #000; display: flex; align-items: center; justify-content: center;
       border-bottom: 1px solid #1e293b;
     }
-    iframe { width: 100%; height: 100%; border: none; }
+    iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; }
     .placeholder { text-align: center; color: var(--muted); padding: 20px; }
     .placeholder h3 { color: var(--text); margin-bottom: 6px; font-size: 1.1rem; }
 
@@ -43,7 +43,7 @@
     .np-title { font-weight: 600; font-size: 0.9rem; }
     .btn {
       background: linear-gradient(135deg, var(--accent), #0284c7); color: #fff; border: none;
-      padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+      padding: 8px 12px; border-radius: 10px; font-weight: 600; font-size: 0.82rem; cursor: pointer;
     }
     .btn.secondary { background: #1e293b; color: var(--text); }
     .btn.danger { background: #dc2626; }
@@ -66,12 +66,13 @@
     .list-container { flex: 1; overflow-y: auto; padding: 10px 16px 30px; }
     .song-item {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      background: var(--card); padding: 12px 14px; border-radius: 12px; margin-bottom: 8px;
+      background: var(--card); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;
       border: 1px solid #1e293b;
     }
+    .song-thumb { width: 64px; height: 48px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
     .song-meta { overflow: hidden; flex: 1; }
-    .song-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-    .song-artist { font-size: 0.8rem; color: var(--muted); }
+    .song-title { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .song-artist { font-size: 0.75rem; color: var(--muted); }
     .song-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
     .status-banner {
@@ -83,16 +84,19 @@
 
   <header>
     <div class="brand">KARA-WEB UTEP</div>
-    <div style="font-size: 0.75rem; color: var(--muted);">YouTube Mode</div>
+    <div>
+      <input type="file" id="localFileInput" accept="video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
+      <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ Load File</button>
+    </div>
   </header>
 
-  <div id="statusBanner" class="status-banner">Type any song name and tap Search!</div>
+  <div id="statusBanner" class="status-banner">Search YouTube or tap "+ Load File" for local videos</div>
 
   <!-- Video Player Stage -->
   <div class="stage" id="playerStage">
     <div class="placeholder">
       <h3>Ready to Sing</h3>
-      <p>Search or select a song below</p>
+      <p>Search YouTube or load a local video file</p>
     </div>
   </div>
 
@@ -106,13 +110,13 @@
 
   <!-- Search Input Bar -->
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search song (e.g., You've Got a Friend karaoke)..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+    <input type="text" id="searchInput" placeholder="Search song (e.g., You've Got a Friend)..." onkeypress="if(event.key==='Enter') searchYouTube()" />
     <button class="btn" onclick="searchYouTube()">Search</button>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
-    <div class="tab active" id="tabSearch" onclick="switchTab('search')">Search Results (<span id="resultCount">0</span>)</div>
+    <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
     <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
   </div>
 
@@ -122,6 +126,8 @@
   </div>
 
   <script>
+    const YOUTUBE_API_KEY = 'AIzaSyDBaE3nXzMESrJslYhZsn4ssGUOpVS1WZI';
+
     let searchResults = [];
     let queue = [];
     let currentTab = 'search';
@@ -138,6 +144,25 @@
       document.getElementById('resultCount').innerText = searchResults.length;
     }
 
+    function handleLocalFiles(event) {
+      const files = Array.from(event.target.files);
+      if (!files.length) return;
+
+      const localSongs = files.map((file, idx) => ({
+        id: 'local_' + Date.now() + '_' + idx,
+        type: 'local',
+        url: URL.createObjectURL(file),
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        channel: 'Local Device File',
+        thumbnail: ''
+      }));
+
+      searchResults = [...localSongs, ...searchResults];
+      document.getElementById('statusBanner').innerText = `Loaded ${files.length} local file(s)`;
+      switchTab('search');
+      updateCounts();
+    }
+
     async function searchYouTube() {
       const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
@@ -146,42 +171,35 @@
       banner.innerText = 'Searching YouTube...';
 
       try {
-        // Direct reliable public search proxy
-        const res = await fetch(`https://invidious.noahistic.pro/api/v1/search?q=${encodeURIComponent(query + ' karaoke')}&type=video`);
-        const items = await res.json();
-        
-        if (Array.isArray(items)) {
-          searchResults = items.map(item => ({
-            id: item.videoId,
-            title: item.title,
-            channel: item.author
-          }));
-        } else {
-          searchResults = [];
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(query + ' karaoke')}&key=${YOUTUBE_API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.error) {
+          banner.innerText = 'API Error: ' + data.error.message;
+          return;
         }
 
-        banner.innerText = `Found ${searchResults.length} karaoke tracks`;
+        searchResults = (data.items || []).map(item => ({
+          id: item.id.videoId,
+          type: 'youtube',
+          title: decodeHTML(item.snippet.title),
+          channel: item.snippet.channelTitle,
+          thumbnail: item.snippet.thumbnails.default.url
+        }));
+
+        banner.innerText = `Found ${searchResults.length} karaoke videos`;
         switchTab('search');
         updateCounts();
       } catch (err) {
-        // Fallback search using direct alternative endpoint
-        try {
-          const res2 = await fetch(`https://pipedapi.yt.artemislabs.eu/search?q=${encodeURIComponent(query + ' karaoke')}&filter=videos`);
-          const data2 = await res2.json();
-          if (data2 && data2.items) {
-            searchResults = data2.items.map(item => ({
-              id: item.url.replace('/watch?v=', ''),
-              title: item.title,
-              channel: item.uploaderName
-            }));
-          }
-          banner.innerText = `Found ${searchResults.length} karaoke tracks`;
-          switchTab('search');
-          updateCounts();
-        } catch (e) {
-          banner.innerText = 'Search connection error. Please try again.';
-        }
+        banner.innerText = 'Network error: ' + err.message;
       }
+    }
+
+    function decodeHTML(str) {
+      const txt = document.createElement('textarea');
+      txt.innerHTML = str;
+      return txt.value;
     }
 
     function renderList() {
@@ -190,13 +208,14 @@
 
       if (currentTab === 'queue') {
         if (queue.length === 0) {
-          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Search and add songs!</p></div>';
+          container.innerHTML = '<div class="placeholder"><p>Queue is empty. Search or load files!</p></div>';
           return;
         }
         queue.forEach((song, idx) => {
           const div = document.createElement('div');
           div.className = 'song-item';
           div.innerHTML = `
+            ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
             <div class="song-meta">
               <div class="song-title">#${idx + 1} • ${song.title}</div>
               <div class="song-artist">${song.channel}</div>
@@ -212,7 +231,7 @@
       }
 
       if (searchResults.length === 0) {
-        container.innerHTML = '<div class="placeholder"><p>No results yet. Type a song above!</p></div>';
+        container.innerHTML = '<div class="placeholder"><p>No results yet. Search above or tap "+ Load File"</p></div>';
         return;
       }
 
@@ -220,12 +239,13 @@
         const div = document.createElement('div');
         div.className = 'song-item';
         div.innerHTML = `
+          ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
           <div class="song-meta">
             <div class="song-title">${song.title}</div>
             <div class="song-artist">${song.channel}</div>
           </div>
           <div class="song-actions">
-            <button class="btn secondary" onclick="playNow('${song.id}', '${encodeURIComponent(song.title)}')">Play</button>
+            <button class="btn secondary" onclick="playById('${song.id}')">Play</button>
             <button class="btn" onclick="addToQueue('${song.id}')">+ Queue</button>
           </div>
         `;
@@ -233,8 +253,8 @@
       });
     }
 
-    function addToQueue(videoId) {
-      const song = searchResults.find(s => s.id === videoId);
+    function addToQueue(id) {
+      const song = searchResults.find(s => s.id === id);
       if (!song) return;
       queue.push(song);
       updateCounts();
@@ -253,7 +273,7 @@
       const [song] = queue.splice(index, 1);
       updateCounts();
       renderList();
-      startStream(song.id, song.title);
+      startStream(song);
     }
 
     function playNext() {
@@ -261,17 +281,23 @@
       const nextSong = queue.shift();
       updateCounts();
       renderList();
-      startStream(nextSong.id, nextSong.title);
+      startStream(nextSong);
     }
 
-    function playNow(videoId, encodedTitle) {
-      startStream(videoId, decodeURIComponent(encodedTitle));
+    function playById(id) {
+      const song = searchResults.find(s => s.id === id);
+      if (song) startStream(song);
     }
 
-    function startStream(videoId, title) {
-      document.getElementById('npTitle').innerText = title;
+    function startStream(song) {
+      document.getElementById('npTitle').innerText = song.title;
       const stage = document.getElementById('playerStage');
-      stage.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+
+      if (song.type === 'local') {
+        stage.innerHTML = `<video src="${song.url}" controls autoplay playsinline onended="playNext()"></video>`;
+      } else {
+        stage.innerHTML = `<iframe src="https://www.youtube.com/embed/${song.id}?autoplay=1&playsinline=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+      }
     }
   </script>
 </body>
