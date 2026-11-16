@@ -221,15 +221,28 @@
       <button class="btn secondary" onclick="exitController()">Exit</button>
     </header>
 
+    <!-- Now Playing & Transport Controls for Guests -->
+    <div class="now-playing">
+      <div class="np-info">
+        <span class="np-title" id="ctrlNpTitle">No song playing</span>
+        <span class="np-next-mini" id="ctrlNpNextMini">Up Next: Queue is empty</span>
+      </div>
+      <div class="transport-btns">
+        <button class="btn secondary" onclick="sendControl('playpause')" title="Play/Pause">⏯</button>
+        <button class="btn danger" onclick="sendControl('stop')" title="Stop">⏹</button>
+        <button class="btn" onclick="sendControl('next')" title="Next">⏭</button>
+      </div>
+    </div>
+
     <!-- Search Input Bar -->
     <div class="search-bar">
-      <input type="text" id="ctrlSearchInput" placeholder="Search song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
+      <input type="text" id="ctrlSearchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
       <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
     </div>
 
     <!-- Controller Tabs -->
     <div class="tabs">
-      <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Search Results (<span id="ctrlResultCount">0</span>)</div>
+      <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
       <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
     </div>
 
@@ -291,6 +304,17 @@
         }
       });
 
+      // Real-time Now Playing Listener for controllers and host status sync
+      db.ref('state/nowPlaying').on('value', (snapshot) => {
+        const title = snapshot.val() || 'No song playing';
+        document.getElementById('ctrlNpTitle').innerText = title;
+      });
+
+      db.ref('state/upNext').on('value', (snapshot) => {
+        const upNextText = snapshot.val() || 'Up Next: Queue is empty';
+        document.getElementById('ctrlNpNextMini').innerText = upNextText;
+      });
+
       // Host listens for remote commands from controllers
       if (!isControllerMode) {
         db.ref('state/command').on('value', (snapshot) => {
@@ -322,16 +346,23 @@
     }
 
     function updateUpNextLabels() {
+      let mainTitle = '"No song reserved"';
+      let mainSinger = '';
+      let miniText = 'Up Next: Queue is empty';
+
       if (queue.length > 0) {
         const nextSong = queue[0];
-        document.getElementById('fsNextSongName').innerText = `"${nextSong.title}"`;
-        document.getElementById('fsNextSingerName').innerText = `Queue by: ${nextSong.singer || 'Guest'}`;
-        document.getElementById('npNextMini').innerText = `Up Next: ${nextSong.title} (Queue by: ${nextSong.singer || 'Guest'})`;
-      } else {
-        document.getElementById('fsNextSongName').innerText = '"No song reserved"';
-        document.getElementById('fsNextSingerName').innerText = '';
-        document.getElementById('npNextMini').innerText = 'Up Next: Queue is empty';
+        mainTitle = `"${nextSong.title}"`;
+        mainSinger = `Queue by: ${nextSong.singer || 'Guest'}`;
+        miniText = `Up Next: ${nextSong.title} (Queue by: ${nextSong.singer || 'Guest'})`;
       }
+
+      document.getElementById('fsNextSongName').innerText = mainTitle;
+      document.getElementById('fsNextSingerName').innerText = mainSinger;
+      document.getElementById('npNextMini').innerText = miniText;
+      
+      // Sync up next status to Firebase so controllers see it live
+      db.ref('state/upNext').set(miniText);
     }
 
     function switchTab(tab) {
@@ -572,7 +603,8 @@
     function stopPlayback() {
       activeMediaType = null;
       ytPlayer = null;
-      document.getElementById('npTitle').innerText = 'Interlude — Ready';
+      document.getElementById('npTitle').innerText = 'No song playing';
+      db.ref('state/nowPlaying').set('No song playing');
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
     }
@@ -580,6 +612,7 @@
     function startStream(song) {
       const displayTitle = `${song.title} (Queue by: ${song.singer || 'Guest'})`;
       document.getElementById('npTitle').innerText = displayTitle;
+      db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
       const mount = document.getElementById('mediaMount');
 
