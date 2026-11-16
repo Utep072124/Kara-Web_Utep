@@ -34,43 +34,42 @@
       background: #000; display: flex; align-items: center; justify-content: center;
       border-bottom: 1px solid #1e293b; overflow: hidden;
     }
-    #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; }
+    #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: auto; }
 
-    /* Custom Fullscreen Stage Mode (Locks screen edge-to-edge with permanent overlays) */
+    /* Custom Fullscreen Stage Mode (Matches your mockup layout perfectly) */
     .stage.custom-fullscreen {
       position: fixed; inset: 0; width: 100vw; height: 100dvh; max-height: none;
       z-index: 99999; border: none; background: #000;
     }
 
-    /* Overlays for Custom Fullscreen Mode (Always visible) */
-    .fs-top-hud, .fs-bottom-hud, .fs-qr-overlay { display: none; }
+    /* Overlays (Hidden in normal mode, active in Custom Fullscreen) */
+    .fs-top-controls, .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
 
-    .stage.custom-fullscreen .fs-top-hud {
-      display: flex; position: absolute; top: 0; left: 0; right: 0;
-      padding: 14px 18px; background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
-      justify-content: space-between; align-items: center; z-index: 99999; pointer-events: none;
+    .stage.custom-fullscreen .fs-top-controls {
+      display: flex; position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      gap: 12px; z-index: 99999; pointer-events: auto;
     }
-    .stage.custom-fullscreen .fs-bottom-hud {
-      display: flex; position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 16px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-      justify-content: center; align-items: center; gap: 10px; z-index: 99999;
+    .stage.custom-fullscreen .fs-next-card {
+      display: flex; flex-direction: column; position: absolute; bottom: 85px; left: 24px;
+      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(0, 210, 255, 0.4);
+      padding: 8px 14px; border-radius: 10px; z-index: 99999; backdrop-filter: blur(6px);
+      max-width: 260px; pointer-events: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-    .stage.custom-fullscreen .fs-qr-overlay {
-      display: flex; position: absolute; top: 50%; left: 20px; transform: translateY(-50%);
-      width: 115px; background: rgba(11, 15, 25, 0.85); border: 1px solid rgba(0, 210, 255, 0.4);
-      padding: 6px; border-radius: 10px; flex-direction: column; align-items: center; text-align: center;
-      z-index: 99998; backdrop-filter: blur(6px); box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    .stage.custom-fullscreen .fs-qr-badge {
+      display: flex; flex-direction: column; align-items: center; position: absolute; top: 50%; right: 24px; transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.95); padding: 8px; border-radius: 12px; z-index: 99999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 85px; text-align: center;
+    }
+    .stage.custom-fullscreen .fs-exit-btn {
+      display: block; position: absolute; top: 16px; right: 20px; z-index: 99999; pointer-events: auto;
     }
 
-    .fs-up-next {
-      background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 210, 255, 0.4);
-      padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; max-width: 60%;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: auto;
-    }
-    .fs-up-next span { color: var(--accent); font-weight: 700; margin-right: 4px; }
-
-    .qr-card img { width: 100px; height: 100px; display: block; border-radius: 6px; }
-    .qr-title { font-weight: 700; font-size: 0.62rem; color: #fff; margin-top: 3px; }
+    /* Mockup-style UI Elements */
+    .fs-next-title { font-size: 0.65rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+    .fs-next-song { font-size: 0.82rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .fs-qr-badge img { width: 70px; height: 70px; display: block; border-radius: 4px; }
+    .fs-qr-label { font-size: 0.55rem; font-weight: 800; color: #111; margin-top: 3px; }
 
     /* Normal Mode Interlude / QR Code Screen */
     .qr-overlay-normal {
@@ -97,7 +96,7 @@
     }
     .btn.secondary { background: #1e293b; color: var(--text); border: 1px solid #334155; }
     .btn.danger { background: #dc2626; }
-    .btn.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); pointer-events: auto; }
+    .btn.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); }
 
     /* Search Bar */
     .search-bar {
@@ -151,18 +150,25 @@
   <!-- Video Player Stage -->
   <div class="stage" id="playerStage">
     
-    <!-- Custom Fullscreen Top HUD (Always visible) -->
-    <div class="fs-top-hud">
-      <div class="fs-up-next" id="fsUpNext"><span>UP NEXT:</span> No song reserved</div>
-      <button class="btn glass" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
+    <!-- Top Floating Controls (Play & Next) -->
+    <div class="fs-top-controls">
+      <button class="btn glass" onclick="togglePlayPause()" title="Play/Pause">▶ Play/Pause</button>
+      <button class="btn glass" onclick="playNext()" title="Next Song">⏭ Next</button>
     </div>
 
-    <!-- Custom Fullscreen Left-Side Small QR Code (~5% screen size) -->
-    <div class="fs-qr-overlay">
-      <div class="qr-card">
-        <img class="qrImgTag" alt="Scan QR" />
-      </div>
-      <div class="qr-title">Scan to Reserve</div>
+    <!-- Exit Fullscreen Button -->
+    <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit</button>
+
+    <!-- Bottom-Left "Next Song" Card (Matching Mockup) -->
+    <div class="fs-next-card">
+      <div class="fs-next-title">Next song</div>
+      <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
+    </div>
+
+    <!-- Right-Side Small QR Badge (~5% area) -->
+    <div class="fs-qr-badge">
+      <img class="qrImgTag" alt="Scan QR" />
+      <div class="fs-qr-label">SCAN QR</div>
     </div>
 
     <!-- Normal Mode Interlude / QR Code Screen -->
@@ -174,13 +180,6 @@
 
     <!-- Active Video Container -->
     <div id="mediaMount" style="width:100%; height:100%;"></div>
-
-    <!-- Custom Fullscreen Bottom Transport HUD (Always visible) -->
-    <div class="fs-bottom-hud">
-      <button class="btn glass" onclick="togglePlayPause()">⏯ Pause / Play</button>
-      <button class="btn danger" onclick="stopPlayback()">⏹ Stop</button>
-      <button class="btn" onclick="playNext()">⏭ Next Song</button>
-    </div>
   </div>
 
   <!-- Now Playing & Transport Controls -->
@@ -235,9 +234,9 @@
     }
 
     function updateUpNextLabels() {
-      const nextText = queue.length > 0 ? queue[0].title : 'No song reserved';
-      document.getElementById('fsUpNext').innerHTML = `<span>UP NEXT:</span> ${nextText}`;
-      document.getElementById('npNextMini').innerText = `Up Next: ${nextText}`;
+      const nextText = queue.length > 0 ? `"${queue[0].title}"` : '"No song reserved"';
+      document.getElementById('fsNextSongName').innerText = nextText;
+      document.getElementById('npNextMini').innerText = `Up Next: ${queue.length > 0 ? queue[0].title : 'Queue is empty'}`;
     }
 
     function switchTab(tab) {
