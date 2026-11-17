@@ -80,44 +80,64 @@
     .qr-overlay-normal {
       position: absolute; inset: 0; background: radial-gradient(circle at center, #111827 0%, #050811 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 16px; z-index: 15;
+      text-align: center; padding: 16px; z-index: 15; overflow: hidden;
     }
     .qr-overlay-normal.hidden { display: none; }
-    
-    /* Animated Standby Logo Icon */
-    .standby-logo {
-      width: 75px; height: 75px; border-radius: 12px; object-fit: cover;
-      margin-bottom: 8px; border: 2px solid var(--accent);
-      box-shadow: 0 0 15px rgba(0,210,255,0.4);
-      animation: pulseLogo 2s ease-in-out infinite alternate;
+
+    /* Floating Musical Symbols (Treble Clef, Sharp, Notes) */
+    .music-symbol {
+      position: absolute; color: rgba(0, 210, 255, 0.2); font-size: 2.8rem;
+      user-select: none; pointer-events: none;
+      animation: floatSymbol 4s ease-in-out infinite;
     }
-    @keyframes pulseLogo {
-      0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(0,210,255,0.3); }
-      100% { transform: scale(1.04); box-shadow: 0 0 22px rgba(0,210,255,0.8); }
+    .music-symbol:nth-child(1) { top: 18%; left: 22%; animation-delay: 0s; }
+    .music-symbol:nth-child(2) { top: 72%; left: 25%; animation-delay: 1.5s; color: rgba(168, 85, 247, 0.2); }
+    .music-symbol:nth-child(3) { top: 20%; right: 22%; animation-delay: 0.8s; }
+    .music-symbol:nth-child(4) { top: 68%; right: 25%; animation-delay: 2.2s; color: rgba(168, 85, 247, 0.2); }
+
+    @keyframes floatSymbol {
+      0% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
+      50% { transform: translateY(-18px) rotate(10deg); opacity: 0.5; }
+      100% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
     }
 
-    /* Animated Equalizer Sound Waves */
+    /* Animated Equalizer Sound Waves (Placed Above Logo) */
     .standby-anim-icon {
-      display: flex; gap: 4px; align-items: flex-end; height: 30px; margin-bottom: 10px;
+      display: flex; gap: 6px; align-items: flex-end; height: 50px; margin-bottom: 16px; z-index: 2;
     }
     .bar {
-      width: 5px; background: var(--accent); border-radius: 3px;
+      width: 8px; background: var(--accent); border-radius: 4px;
       animation: pulseBar 1.2s ease-in-out infinite alternate;
     }
-    .bar:nth-child(1) { animation-delay: 0.1s; height: 12px; }
-    .bar:nth-child(2) { animation-delay: 0.3s; height: 26px; background: var(--accent2); }
-    .bar:nth-child(3) { animation-delay: 0.2s; height: 18px; }
-    .bar:nth-child(4) { animation-delay: 0.5s; height: 30px; background: var(--accent2); }
-    .bar:nth-child(5) { animation-delay: 0.4s; height: 15px; }
+    .bar:nth-child(1) { animation-delay: 0.1s; height: 20px; }
+    .bar:nth-child(2) { animation-delay: 0.3s; height: 45px; background: var(--accent2); }
+    .bar:nth-child(3) { animation-delay: 0.2s; height: 32px; }
+    .bar:nth-child(4) { animation-delay: 0.6s; height: 50px; background: var(--accent); }
+    .bar:nth-child(5) { animation-delay: 0.4s; height: 38px; background: var(--accent2); }
+    .bar:nth-child(6) { animation-delay: 0.2s; height: 25px; }
 
     @keyframes pulseBar {
-      0% { transform: scaleY(0.4); opacity: 0.5; }
+      0% { transform: scaleY(0.3); opacity: 0.4; }
       100% { transform: scaleY(1.1); opacity: 1; }
     }
 
-    .qr-overlay-normal img.qrImgTag {
-      width: 130px; height: 130px; border-radius: 8px; margin-bottom: 6px;
-      box-shadow: 0 4px 20px rgba(0,210,255,0.3); background: #fff; padding: 4px;
+    /* Maximized Pulsing Logo Icon */
+    .standby-logo {
+      width: 150px; height: 150px; border-radius: 22px; object-fit: cover;
+      border: 3px solid var(--accent); z-index: 2;
+      box-shadow: 0 0 30px rgba(0,210,255,0.5);
+      animation: pulseLogo 2s ease-in-out infinite alternate;
+    }
+    @keyframes pulseLogo {
+      0% { transform: scale(0.96); box-shadow: 0 0 15px rgba(0,210,255,0.3); }
+      100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,210,255,0.9); }
+    }
+
+    .standby-title {
+      font-weight: 800; font-size: 1.3rem; color: #fff; margin-top: 14px; letter-spacing: 1px; z-index: 2;
+    }
+    .standby-subtitle {
+      font-size: 0.9rem; color: var(--accent); margin-top: 4px; z-index: 2;
     }
 
     /* Now Playing & Transport Controls Bar */
@@ -211,18 +231,28 @@
         <div class="fs-qr-label">GUEST QR</div>
       </div>
 
-      <!-- Normal Mode Interlude / Standby Screen with Pulsing Logo & Equalizer -->
+      <!-- Normal Mode Interlude / Standby Screen -->
       <div class="qr-overlay-normal" id="normalQrOverlay">
-        <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
+        <div class="music-symbol">𝄞</div>
+        <div class="music-symbol">♯</div>
+        <div class="music-symbol">♫</div>
+        <div class="music-symbol">♪</div>
+
+        <!-- Animated Equalizer Bars Placed ABOVE Logo -->
         <div class="standby-anim-icon">
           <div class="bar"></div>
           <div class="bar"></div>
           <div class="bar"></div>
           <div class="bar"></div>
           <div class="bar"></div>
+          <div class="bar"></div>
         </div>
-        <img class="qrImgTag" alt="Scan to Open Kara-Web Utep" />
-        <div style="font-weight:700; font-size:1rem; color:#fff; margin-top:6px;">Scan to Reserve Songs</div>
+
+        <!-- Maximized Pulsing Logo -->
+        <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
+        
+        <div class="standby-title">KARA-WEB UTEP</div>
+        <div class="standby-subtitle">Scan the Guest QR at the bottom-right to reserve songs</div>
       </div>
 
       <!-- Active Video Container -->
