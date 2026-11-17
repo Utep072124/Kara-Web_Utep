@@ -41,45 +41,66 @@
     }
     #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: auto; }
 
-    /* Custom Fullscreen Stage Mode */
-    .stage.custom-fullscreen {
-      position: fixed; inset: 0; width: 100vw; height: 100dvh; max-height: none;
-      z-index: 99999; border: none; background: #000;
+    /* Custom Fullscreen Stage Mode for Downloader */
+    .stage.custom-fullscreen, .stage:fullscreen {
+      position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important; max-height: none !important;
+      z-index: 2147483647 !important; border: none !important; background: #000 !important;
     }
 
     .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
 
-    .stage.custom-fullscreen .fs-next-card {
+    .stage.custom-fullscreen .fs-next-card, .stage:fullscreen .fs-next-card {
       display: flex; flex-direction: column; position: absolute; bottom: 10px; left: 10px;
-      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(0, 210, 255, 0.4);
-      padding: 8px 12px; border-radius: 10px; z-index: 99999; backdrop-filter: blur(6px);
-      max-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(0, 210, 255, 0.4);
+      padding: 8px 12px; border-radius: 10px; z-index: 2147483647;
+      max-width: 280px; box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     }
-    .stage.custom-fullscreen .fs-qr-badge {
-      display: flex; flex-direction: column; align-items: center; position: absolute; top: 16px; right: 16px;
-      background: rgba(255, 255, 255, 0.95); padding: 5px; border-radius: 8px; z-index: 99999;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 60px; text-align: center;
+    /* QR Badge moved to Right Lower Corner, reduced size, no caption */
+    .stage.custom-fullscreen .fs-qr-badge, .stage:fullscreen .fs-qr-badge {
+      display: flex; flex-direction: column; align-items: center; position: absolute; bottom: 16px; right: 16px;
+      background: rgba(255, 255, 255, 0.95); padding: 4px; border-radius: 6px; z-index: 2147483647;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7); width: 48px; text-align: center;
     }
-    .stage.custom-fullscreen .fs-exit-btn {
-      display: block; position: absolute; top: 16px; left: 16px; z-index: 99999; pointer-events: auto;
+    .stage.custom-fullscreen .fs-qr-badge img, .stage:fullscreen .fs-qr-badge img {
+      width: 40px; height: 40px; display: block; border-radius: 3px;
+    }
+    .stage.custom-fullscreen .fs-exit-btn, .stage:fullscreen .fs-exit-btn {
+      display: block; position: absolute; top: 16px; left: 16px; z-index: 2147483647; pointer-events: auto;
       padding: 5px 10px; font-size: 0.75rem;
     }
 
     .fs-next-title { font-size: 0.55rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
     .fs-next-song { font-size: 0.78rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
     .fs-next-singer { font-size: 0.68rem; color: #cbd5e1; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .fs-qr-badge img { width: 50px; height: 50px; display: block; border-radius: 4px; }
-    .fs-qr-label { font-size: 0.4rem; font-weight: 800; color: #111; margin-top: 2px; }
 
-    /* Normal Mode Interlude / QR Code Screen */
+    /* Normal Mode Interlude / QR Code Screen with Standby Animation */
     .qr-overlay-normal {
       position: absolute; inset: 0; background: radial-gradient(circle at center, #111827 0%, #050811 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center; padding: 16px; z-index: 15;
     }
     .qr-overlay-normal.hidden { display: none; }
-    .qr-overlay-normal img { width: 140px; height: 140px; border-radius: 8px; margin-bottom: 8px; }
+    .qr-overlay-normal img { width: 130px; height: 130px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 4px 20px rgba(0,210,255,0.3); }
+
+    /* Standby Animated Equalizer/Microphone Icon */
+    .standby-anim-icon {
+      display: flex; gap: 4px; align-items: flex-end; height: 35px; margin-bottom: 12px;
+    }
+    .bar {
+      width: 6px; background: var(--accent); border-radius: 3px;
+      animation: pulseBar 1.2s ease-in-out infinite alternate;
+    }
+    .bar:nth-child(1) { animation-delay: 0.1s; height: 15px; }
+    .bar:nth-child(2) { animation-delay: 0.3s; height: 30px; background: var(--accent2); }
+    .bar:nth-child(3) { animation-delay: 0.2s; height: 22px; }
+    .bar:nth-child(4) { animation-delay: 0.5s; height: 35px; background: var(--accent2); }
+    .bar:nth-child(5) { animation-delay: 0.4s; height: 18px; }
+
+    @keyframes pulseBar {
+      0% { transform: scaleY(0.4); opacity: 0.5; }
+      100% { transform: scaleY(1.1); opacity: 1; }
+    }
 
     /* Now Playing & Transport Controls Bar */
     .now-playing {
@@ -97,7 +118,7 @@
     }
     .btn.secondary { background: #1e293b; color: var(--text); border: 1px solid #334155; }
     .btn.danger { background: #dc2626; }
-    .btn.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); }
+    .btn.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); }
 
     /* Search Bar */
     .search-bar {
@@ -166,16 +187,22 @@
         <div class="fs-next-singer" id="fsNextSingerName"></div>
       </div>
 
-      <!-- Right-Side Small QR Badge (~4% size) Named Guest Control QR -->
+      <!-- Right Lower Corner Small QR Badge (No Caption, Just QR Image) -->
       <div class="fs-qr-badge">
         <img class="qrImgTag" alt="Scan QR" />
-        <div class="fs-qr-label">GUEST QR</div>
       </div>
 
-      <!-- Normal Mode Interlude / QR Code Screen -->
+      <!-- Normal Mode Interlude / Standby Screen with Animated Icon -->
       <div class="qr-overlay-normal" id="normalQrOverlay">
+        <div class="standby-anim-icon">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
         <img class="qrImgTag" alt="Scan to Open Kara-Web Utep" />
-        <div style="font-weight:700; font-size:1rem; color:#fff; margin-top:6px;">Scan Guest Control QR to Reserve</div>
+        <div style="font-weight:700; font-size:1rem; color:#fff; margin-top:6px;">Scan to Reserve Songs</div>
         <div style="font-size:0.8rem; color:var(--accent);">utep072124.github.io/Kara-Web_Utep</div>
       </div>
 
@@ -304,7 +331,7 @@
         }
       });
 
-      // Real-time Now Playing Listener for controllers and host status sync
+      // Real-time Now Playing Listener
       db.ref('state/nowPlaying').on('value', (snapshot) => {
         const title = snapshot.val() || 'No song playing';
         document.getElementById('ctrlNpTitle').innerText = title;
@@ -342,8 +369,31 @@
 
     function toggleCustomFullscreen() {
       const stage = document.getElementById('playerStage');
-      stage.classList.toggle('custom-fullscreen');
+      const isCurrentlyFs = stage.classList.contains('custom-fullscreen') || document.fullscreenElement;
+
+      if (!isCurrentlyFs) {
+        stage.classList.add('custom-fullscreen');
+        if (stage.requestFullscreen) {
+          stage.requestFullscreen().catch(() => {});
+        } else if (stage.webkitRequestFullscreen) {
+          stage.webkitRequestFullscreen();
+        }
+      } else {
+        stage.classList.remove('custom-fullscreen');
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
     }
+
+    document.addEventListener('fullscreenchange', () => {
+      const stage = document.getElementById('playerStage');
+      if (!document.fullscreenElement) {
+        stage.classList.remove('custom-fullscreen');
+      }
+    });
 
     function updateUpNextLabels() {
       let mainTitle = '"No song reserved"';
@@ -361,7 +411,6 @@
       document.getElementById('fsNextSingerName').innerText = mainSinger;
       document.getElementById('npNextMini').innerText = miniText;
       
-      // Sync up next status to Firebase so controllers see it live
       db.ref('state/upNext').set(miniText);
     }
 
@@ -625,8 +674,17 @@
         mount.innerHTML = `<div id="ytPlayerContainer"></div>`;
         ytPlayer = new YT.Player('ytPlayerContainer', {
           videoId: song.id,
-          playerVars: { autoplay: 1, playsinline: 1, rel: 0 },
+          playerVars: { 
+            autoplay: 1, 
+            playsinline: 1, 
+            rel: 0,
+            iv_load_policy: 3,
+            vq: 'hd720'
+          },
           events: {
+            onReady: (event) => {
+              event.target.setPlaybackQuality('hd720');
+            },
             onStateChange: (event) => {
               if (event.data === YT.PlayerState.ENDED) {
                 playNext();
