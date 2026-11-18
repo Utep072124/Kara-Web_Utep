@@ -673,12 +673,37 @@
       });
     }
 
-    function promptAndQueue(id, isCtrl) {
-      const singer = prompt("Enter Your Name (Optional):", "Guest");
-      if (singer === null) return;
+    // Integrated oEmbed Verification Check Before Queueing
+    async function promptAndQueue(id, isCtrl) {
       const list = isCtrl ? ctrlSearchResults : searchResults;
       const song = list.find(s => s.id === id);
       if (!song) return;
+
+      // Local files bypass embed checks
+      if (song.type === 'local') {
+        finalizeQueueAddition(song, isCtrl);
+        return;
+      }
+
+      // Check YouTube oEmbed status to ensure embedding is enabled
+      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${song.id}&format=json`;
+      try {
+        const response = await fetch(oembedUrl);
+        if (!response.ok) {
+          alert(`"${song.title}" cannot be played because embedding is disabled by the video owner. Please pick another version!`);
+          return;
+        }
+        finalizeQueueAddition(song, isCtrl);
+      } catch (err) {
+        console.error("oEmbed check failed:", err);
+        // Fallback: allow queueing if network error occurs during check
+        finalizeQueueAddition(song, isCtrl);
+      }
+    }
+
+    function finalizeQueueAddition(song, isCtrl) {
+      const singer = prompt("Enter Your Name (Optional):", "Guest");
+      if (singer === null) return;
       
       const songCopy = { ...song };
       songCopy.singer = singer.trim() || 'Guest';
