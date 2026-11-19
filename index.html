@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="icon.jpg" />
   <link rel="icon" type="image/jpeg" href="icon.jpg" />
   <title>Kara-Web Utep</title>
-  
+
   <!-- YouTube API & Firebase Compat SDKs -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -52,51 +52,51 @@
 
     /* Responsive Bottom-Left "Next Song" Card */
     .stage.custom-fullscreen .fs-next-card, .stage:fullscreen .fs-next-card {
-      display: flex; flex-direction: column; position: absolute; 
+      display: flex; flex-direction: column; position: absolute;
       bottom: clamp(12px, 2vh, 28px); left: clamp(12px, 2vw, 28px);
       background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(0, 210, 255, 0.45);
-      padding: clamp(8px, 1.2vw, 18px) clamp(12px, 1.8vw, 24px); 
+      padding: clamp(8px, 1.2vw, 18px) clamp(12px, 1.8vw, 24px);
       border-radius: clamp(10px, 1vw, 16px); z-index: 2147483647;
-      max-width: clamp(280px, 34vw, 560px); 
+      max-width: clamp(280px, 34vw, 560px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.7);
     }
 
-    .fs-next-title { 
-      font-size: clamp(0.6rem, 0.9vw, 1rem); color: var(--accent); 
-      font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; 
+    .fs-next-title {
+      font-size: clamp(0.6rem, 0.9vw, 1rem); color: var(--accent);
+      font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px;
     }
-    .fs-next-song { 
-      font-size: clamp(0.85rem, 1.45vw, 1.65rem); color: #fff; 
-      font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; 
+    .fs-next-song {
+      font-size: clamp(0.85rem, 1.45vw, 1.65rem); color: #fff;
+      font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
     }
-    .fs-next-singer { 
-      font-size: clamp(0.72rem, 1.1vw, 1.25rem); color: #cbd5e1; 
-      font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    .fs-next-singer {
+      font-size: clamp(0.72rem, 1.1vw, 1.25rem); color: #cbd5e1;
+      font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     /* Responsive Bottom-Right Small QR Badge with "GUEST QR" label */
     .stage.custom-fullscreen .fs-qr-badge, .stage:fullscreen .fs-qr-badge {
-      display: flex; flex-direction: column; align-items: center; position: absolute; 
+      display: flex; flex-direction: column; align-items: center; position: absolute;
       bottom: clamp(12px, 2vh, 28px); right: clamp(12px, 2vw, 28px);
-      background: rgba(255, 255, 255, 0.96); padding: clamp(5px, 0.6vw, 10px); 
+      background: rgba(255, 255, 255, 0.96); padding: clamp(5px, 0.6vw, 10px);
       border-radius: clamp(8px, 0.8vw, 14px); z-index: 2147483647;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.75); 
+      box-shadow: 0 6px 24px rgba(0,0,0,0.75);
       width: clamp(64px, 7.5vw, 135px); text-align: center;
     }
     .stage.custom-fullscreen .fs-qr-badge img, .stage:fullscreen .fs-qr-badge img {
       width: 100%; height: auto; aspect-ratio: 1 / 1; display: block; border-radius: 4px;
     }
-    .fs-qr-label { 
-      font-size: clamp(0.48rem, 0.72vw, 0.95rem); font-weight: 800; 
-      color: #111; margin-top: 3px; letter-spacing: 0.03em; 
+    .fs-qr-label {
+      font-size: clamp(0.48rem, 0.72vw, 0.95rem); font-weight: 800;
+      color: #111; margin-top: 3px; letter-spacing: 0.03em;
     }
 
     /* Responsive Exit Stage Button */
     .stage.custom-fullscreen .fs-exit-btn, .stage:fullscreen .fs-exit-btn {
-      display: block; position: absolute; 
-      top: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px); 
+      display: block; position: absolute;
+      top: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px);
       z-index: 2147483647; pointer-events: auto;
-      padding: clamp(6px, 0.7vw, 12px) clamp(12px, 1.2vw, 20px); 
+      padding: clamp(6px, 0.7vw, 12px) clamp(12px, 1.2vw, 20px);
       font-size: clamp(0.75rem, 1vw, 1.1rem);
     }
 
@@ -110,7 +110,7 @@
 
     /* Responsive Floating Musical Symbols (Treble Clef, Sharp, Notes) */
     .music-symbol {
-      position: absolute; color: rgba(0, 210, 255, 0.22); 
+      position: absolute; color: rgba(0, 210, 255, 0.22);
       font-size: clamp(2rem, 4.5vw, 5.5rem);
       user-select: none; pointer-events: none;
       animation: floatSymbol 4s ease-in-out infinite;
@@ -128,7 +128,7 @@
 
     /* Responsive Animated Equalizer Sound Waves (Placed Above Logo) */
     .standby-anim-icon {
-      display: flex; gap: clamp(5px, 0.6vw, 10px); align-items: flex-end; 
+      display: flex; gap: clamp(5px, 0.6vw, 10px); align-items: flex-end;
       height: clamp(42px, 6vh, 80px); margin-bottom: clamp(14px, 2vh, 26px); z-index: 2;
     }
     .bar {
@@ -149,7 +149,7 @@
 
     /* Responsive Maximized Pulsing Logo Icon */
     .standby-logo {
-      width: clamp(140px, 18vw, 260px); height: clamp(140px, 18vw, 260px); 
+      width: clamp(140px, 18vw, 260px); height: clamp(140px, 18vw, 260px);
       border-radius: clamp(20px, 2.2vw, 34px); object-fit: cover;
       border: 3px solid var(--accent); z-index: 2;
       box-shadow: 0 0 30px rgba(0,210,255,0.5);
@@ -161,11 +161,11 @@
     }
 
     .standby-title {
-      font-weight: 800; font-size: clamp(1.3rem, 2.4vw, 2.8rem); 
+      font-weight: 800; font-size: clamp(1.3rem, 2.4vw, 2.8rem);
       color: #fff; margin-top: clamp(12px, 1.8vh, 24px); letter-spacing: 1.5px; z-index: 2;
     }
     .standby-subtitle {
-      font-size: clamp(0.85rem, 1.3vw, 1.45rem); color: var(--accent); 
+      font-size: clamp(0.85rem, 1.3vw, 1.45rem); color: var(--accent);
       margin-top: 6px; z-index: 2;
     }
 
@@ -279,7 +279,7 @@
 
         <!-- Maximized Pulsing Logo -->
         <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
-        
+
         <div class="standby-title">KARA-WEB UTEP</div>
         <div class="standby-subtitle">Scan the Guest QR at the bottom-right to reserve songs</div>
       </div>
@@ -382,6 +382,7 @@
     let ytPlayer = null;
     let activeMediaType = null;
     let isControllerMode = false;
+    let currentSongInstanceKey = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
@@ -395,7 +396,7 @@
         document.getElementById('controllerView').style.display = 'flex';
       }
 
-      // Real-time Queue Listener
+      // 1. Real-time Queue Listener
       db.ref('queue').on('value', (snapshot) => {
         const data = snapshot.val();
         queue = data ? Object.values(data) : [];
@@ -404,399 +405,35 @@
         if (isControllerMode) {
           renderControllerList();
         }
-        if (!activeMediaType && queue.length > 0 && !isControllerMode) {
+        if (!isControllerMode && !currentSongInstanceKey && queue.length > 0) {
           playNext();
         }
       });
 
-      // Real-time Now Playing Listener
-      db.ref('state/nowPlaying').on('value', (snapshot) => {
-        const title = snapshot.val() || 'No song playing';
-        document.getElementById('ctrlNpTitle').innerText = title;
-      });
-
-      db.ref('state/upNext').on('value', (snapshot) => {
-        const upNextText = snapshot.val() || 'Up Next: Queue is empty';
-        document.getElementById('ctrlNpNextMini').innerText = upNextText;
-      });
-
-      // Host listens for remote commands from controllers
-      if (!isControllerMode) {
-        db.ref('state/command').on('value', (snapshot) => {
-          const cmd = snapshot.val();
-          if (!cmd) return;
-          if (cmd === 'playpause') togglePlayPause();
-          if (cmd === 'stop') stopPlayback();
-          if (cmd === 'next') playNext();
-          db.ref('state/command').remove();
-        });
-      }
-    });
-
-    function openController() {
-      window.open(APP_URL + '?controller=true', '_blank');
-    }
-
-    function exitController() {
-      window.location.href = APP_URL;
-    }
-
-    function sendControl(action) {
-      db.ref('state/command').set(action);
-    }
-
-    function toggleCustomFullscreen() {
-      const stage = document.getElementById('playerStage');
-      const isCurrentlyFs = stage.classList.contains('custom-fullscreen') || document.fullscreenElement;
-
-      if (!isCurrentlyFs) {
-        stage.classList.add('custom-fullscreen');
-        if (stage.requestFullscreen) {
-          stage.requestFullscreen().catch(() => {});
-        } else if (stage.webkitRequestFullscreen) {
-          stage.webkitRequestFullscreen();
-        }
-      } else {
-        stage.classList.remove('custom-fullscreen');
-        if (document.fullscreenElement && document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-      }
-    }
-
-    document.addEventListener('fullscreenchange', () => {
-      const stage = document.getElementById('playerStage');
-      if (!document.fullscreenElement) {
-        stage.classList.remove('custom-fullscreen');
-      }
-    });
-
-    function updateUpNextLabels() {
-      let mainTitle = '"No song reserved"';
-      let mainSinger = '';
-      let miniText = 'Up Next: Queue is empty';
-
-      if (queue.length > 0) {
-        const nextSong = queue[0];
-        mainTitle = `"${nextSong.title}"`;
-        mainSinger = `Queue by: ${nextSong.singer || 'Guest'}`;
-        miniText = `Up Next: ${nextSong.title} (Queue by: ${nextSong.singer || 'Guest'})`;
-      }
-
-      document.getElementById('fsNextSongName').innerText = mainTitle;
-      document.getElementById('fsNextSingerName').innerText = mainSinger;
-      document.getElementById('npNextMini').innerText = miniText;
-      
-      db.ref('state/upNext').set(miniText);
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      document.getElementById('tabSearch').classList.toggle('active', tab === 'search');
-      document.getElementById('tabQueue').classList.toggle('active', tab === 'queue');
-      renderList();
-    }
-
-    function switchCtrlTab(tab) {
-      ctrlTab = tab;
-      document.getElementById('ctrlTabSearch').classList.toggle('active', tab === 'search');
-      document.getElementById('ctrlTabQueue').classList.toggle('active', tab === 'queue');
-      renderControllerList();
-    }
-
-    function updateCounts() {
-      document.getElementById('queueCount').innerText = queue.length;
-      document.getElementById('resultCount').innerText = searchResults.length;
-      document.getElementById('ctrlQueueCount').innerText = queue.length;
-      document.getElementById('ctrlResultCount').innerText = ctrlSearchResults.length;
-      updateUpNextLabels();
-    }
-
-    function handleLocalFiles(event) {
-      const files = Array.from(event.target.files);
-      if (!files.length) return;
-
-      const localSongs = files.map((file, idx) => ({
-        id: 'local_' + Date.now() + '_' + idx,
-        type: 'local',
-        url: URL.createObjectURL(file),
-        title: file.name.replace(/\.[^/.]+$/, ''),
-        channel: 'Local File',
-        thumbnail: ''
-      }));
-
-      searchResults = [...localSongs, ...searchResults];
-      switchTab('search');
-      updateCounts();
-    }
-
-    async function searchYouTube() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return;
-      fetchResults(query, false);
-    }
-
-    async function ctrlSearchYouTube() {
-      const query = document.getElementById('ctrlSearchInput').value.trim();
-      if (!query) return;
-      fetchResults(query, true);
-    }
-
-    async function fetchResults(query, isController) {
-      try {
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(query + ' karaoke')}&key=${YOUTUBE_API_KEY}`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        const mapped = (data.items || []).map(item => ({
-          id: item.id.videoId,
-          type: 'youtube',
-          title: decodeHTML(item.snippet.title),
-          channel: item.snippet.channelTitle,
-          thumbnail: item.snippet.thumbnails.default.url
-        }));
-
-        if (isController) {
-          ctrlSearchResults = mapped;
-          switchCtrlTab('search');
-          updateCounts();
-        } else {
-          searchResults = mapped;
-          switchTab('search');
-          updateCounts();
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    function decodeHTML(str) {
-      const txt = document.createElement('textarea');
-      txt.innerHTML = str;
-      return txt.value;
-    }
-
-    function renderList() {
-      const container = document.getElementById('listContainer');
-      container.innerHTML = '';
-
-      if (currentTab === 'queue') {
-        if (queue.length === 0) {
-          container.innerHTML = '<div class="placeholder"><p>Queue is empty.</p></div>';
-          return;
-        }
-        queue.forEach((song, idx) => {
-          const div = document.createElement('div');
-          div.className = 'song-item';
-          div.innerHTML = `
-            ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
-            <div class="song-meta">
-              <div class="song-title">#${idx + 1} • ${song.title}</div>
-              <div class="song-artist">Queue by: ${song.singer || 'Guest'} • ${song.channel}</div>
-            </div>
-            <div class="song-actions">
-              <button class="btn danger" onclick="removeFromFirebaseQueue(${idx})">✕</button>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-        return;
-      }
-
-      if (searchResults.length === 0) {
-        container.innerHTML = '<div class="placeholder"><p>No results yet.</p></div>';
-        return;
-      }
-
-      searchResults.forEach(song => {
-        const div = document.createElement('div');
-        div.className = 'song-item';
-        div.innerHTML = `
-          ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
-          <div class="song-meta">
-            <div class="song-title">${song.title}</div>
-            <div class="song-artist">${song.channel}</div>
-          </div>
-          <div class="song-actions">
-            <button class="btn" onclick="promptAndQueue('${song.id}', false)">+ Queue</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function renderControllerList() {
-      const container = document.getElementById('ctrlListContainer');
-      container.innerHTML = '';
-
-      if (ctrlTab === 'queue') {
-        if (queue.length === 0) {
-          container.innerHTML = '<div class="placeholder"><p>Queue is empty.</p></div>';
-          return;
-        }
-        queue.forEach((song, idx) => {
-          const div = document.createElement('div');
-          div.className = 'song-item';
-          div.innerHTML = `
-            ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
-            <div class="song-meta">
-              <div class="song-title">#${idx + 1} • ${song.title}</div>
-              <div class="song-artist">Queue by: ${song.singer || 'Guest'} • ${song.channel}</div>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-        return;
-      }
-
-      if (ctrlSearchResults.length === 0) {
-        container.innerHTML = '<div class="placeholder"><p>Search songs to add to queue</p></div>';
-        return;
-      }
-
-      ctrlSearchResults.forEach(song => {
-        const div = document.createElement('div');
-        div.className = 'song-item';
-        div.innerHTML = `
-          ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
-          <div class="song-meta">
-            <div class="song-title">${song.title}</div>
-            <div class="song-artist">${song.channel}</div>
-          </div>
-          <div class="song-actions">
-            <button class="btn" onclick="promptAndQueue('${song.id}', true)">Queue</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Integrated oEmbed Verification Check Before Queueing
-    async function promptAndQueue(id, isCtrl) {
-      const list = isCtrl ? ctrlSearchResults : searchResults;
-      const song = list.find(s => s.id === id);
-      if (!song) return;
-
-      // Local files bypass embed checks
-      if (song.type === 'local') {
-        finalizeQueueAddition(song, isCtrl);
-        return;
-      }
-
-      // Check YouTube oEmbed status to ensure embedding is enabled
-      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${song.id}&format=json`;
-      try {
-        const response = await fetch(oembedUrl);
-        if (!response.ok) {
-          alert(`"${song.title}" cannot be played because embedding is disabled by the video owner. Please pick another version!`);
-          return;
-        }
-        finalizeQueueAddition(song, isCtrl);
-      } catch (err) {
-        console.error("oEmbed check failed:", err);
-        // Fallback: allow queueing if network error occurs during check
-        finalizeQueueAddition(song, isCtrl);
-      }
-    }
-
-    function finalizeQueueAddition(song, isCtrl) {
-      const singer = prompt("Enter Your Name (Optional):", "Guest");
-      if (singer === null) return;
-      
-      const songCopy = { ...song };
-      songCopy.singer = singer.trim() || 'Guest';
-      db.ref('queue').push(songCopy);
-      alert(`Successfully queued "${songCopy.title}" (Queue by: ${songCopy.singer})`);
-    }
-
-    function removeFromFirebaseQueue(index) {
-      db.ref('queue').once('value', (snapshot) => {
-        const val = snapshot.val();
-        if (!val) return;
-        const keys = Object.keys(val);
-        if (keys[index]) {
-          db.ref('queue/' + keys[index]).remove();
-        }
-      });
-    }
-
-    function playNext() {
-      db.ref('queue').once('value', (snapshot) => {
-        const val = snapshot.val();
-        if (!val) {
-          stopPlayback();
-          return;
-        }
-        const keys = Object.keys(val);
-        const firstKey = keys[0];
-        const nextSong = val[firstKey];
-        db.ref('queue/' + firstKey).remove();
-        startStream(nextSong);
-      });
-    }
-
-    function togglePlayPause() {
-      if (activeMediaType === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-        if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
-          ytPlayer.pauseVideo();
-        } else {
-          ytPlayer.playVideo();
-        }
-      } else if (activeMediaType === 'local') {
-        const vid = document.getElementById('localVideoEl');
-        if (vid) {
-          if (vid.paused) vid.play(); else vid.pause();
-        }
-      }
-    }
-
-    function stopPlayback() {
-      activeMediaType = null;
-      ytPlayer = null;
-      document.getElementById('npTitle').innerText = 'No song playing';
-      db.ref('state/nowPlaying').set('No song playing');
-      document.getElementById('mediaMount').innerHTML = '';
-      document.getElementById('normalQrOverlay').classList.remove('hidden');
-    }
-
-    function startStream(song) {
-      const displayTitle = `${song.title} (Queue by: ${song.singer || 'Guest'})`;
-      document.getElementById('npTitle').innerText = displayTitle;
-      db.ref('state/nowPlaying').set(displayTitle);
-      document.getElementById('normalQrOverlay').classList.add('hidden');
-      const mount = document.getElementById('mediaMount');
-
-      if (song.type === 'local') {
-        activeMediaType = 'local';
-        ytPlayer = null;
-        mount.innerHTML = `<video id="localVideoEl" src="${song.url}" controls autoplay playsinline onended="playNext()"></video>`;
-      } else {
-        activeMediaType = 'youtube';
-        mount.innerHTML = `<div id="ytPlayerContainer"></div>`;
-        ytPlayer = new YT.Player('ytPlayerContainer', {
-          videoId: song.id,
-          playerVars: { 
-            autoplay: 1, 
-            playsinline: 1, 
-            rel: 0,
-            iv_load_policy: 3,
-            vq: 'hd720'
-          },
-          events: {
-            onReady: (event) => {
-              event.target.setPlaybackQuality('hd720');
-            },
-            onStateChange: (event) => {
-              if (event.data === YT.PlayerState.ENDED) {
-                playNext();
-              }
-            }
+      // 2. Sync Active Song across Web Host & Android TV
+      db.ref('state/currentSong').on('value', (snapshot) => {
+        const song = snapshot.val();
+        if (!song || !song.id) {
+          currentSongInstanceKey = null;
+          if (!isControllerMode) {
+            renderStoppedUI();
           }
-        });
-      }
-    }
-  </script>
-</body>
-</html>
+          return;
+        }
+
+        const instanceKey = `${song.id}_${song.startedAt || ''}`;
+        if (currentSongInstanceKey !== instanceKey) {
+          currentSongInstanceKey = instanceKey;
+          if (!isControllerMode) {
+            startStream(song);
+          }
+        }
+      });
+
+      // 3. Sync Play/Pause state across Web Host & Android TV
+      db.ref('state/isPlaying').on('value', (snapshot) => {
+        const shouldPlay = snapshot.val();
+        if (shouldPlay === null || isControllerMode) return;
+
+        if (activeMediaType === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+          const state = ytPlayer.getPlayerState
