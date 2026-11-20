@@ -372,7 +372,7 @@
     const db = firebase.database();
 
     const YOUTUBE_API_KEY = 'AIzaSyDBaE3nXzMESrJslYhZsn4ssGUOpVS1WZI';
-    const APP_URL = 'https://utep072124.github.io/Kara-Web_Utep/';
+    const APP_URL = window.location.href.split('?')[0];
 
     let searchResults = [];
     let queue = [];
@@ -396,7 +396,6 @@
         document.getElementById('controllerView').style.display = 'flex';
       }
 
-      // 1. Real-time Queue Listener
       db.ref('queue').on('value', (snapshot) => {
         const data = snapshot.val();
         queue = data ? Object.values(data) : [];
@@ -405,12 +404,8 @@
         if (isControllerMode) {
           renderControllerList();
         }
-        if (!isControllerMode && !currentSongInstanceKey && queue.length > 0) {
-          playNext();
-        }
       });
 
-      // 2. Sync Active Song across Web Host & Android TV
       db.ref('state/currentSong').on('value', (snapshot) => {
         const song = snapshot.val();
         if (!song || !song.id) {
@@ -430,7 +425,6 @@
         }
       });
 
-      // 3. Sync Play/Pause state across Web Host & Android TV
       db.ref('state/isPlaying').on('value', (snapshot) => {
         const shouldPlay = snapshot.val();
         if (shouldPlay === null || isControllerMode) return;
@@ -451,7 +445,6 @@
         }
       });
 
-      // 4. Real-time Now Playing & Up Next Listeners
       db.ref('state/nowPlaying').on('value', (snapshot) => {
         const title = snapshot.val() || 'No song playing';
         document.getElementById('ctrlNpTitle').innerText = title;
@@ -462,7 +455,6 @@
         document.getElementById('ctrlNpNextMini').innerText = upNextText;
       });
 
-      // 5. Host listens for remote commands from controllers or Android TV
       if (!isControllerMode) {
         db.ref('state/command').on('value', (snapshot) => {
           const cmd = snapshot.val();
@@ -721,7 +713,7 @@
       if (!song) return;
 
       if (song.type === 'local') {
-        finalizeQueueAddition(song, isCtrl);
+        finalizeQueueAddition(song);
         return;
       }
 
@@ -732,14 +724,13 @@
           alert(`"${song.title}" cannot be played because embedding is disabled by the video owner. Please pick another version!`);
           return;
         }
-        finalizeQueueAddition(song, isCtrl);
+        finalizeQueueAddition(song);
       } catch (err) {
-        console.error("oEmbed check failed:", err);
-        finalizeQueueAddition(song, isCtrl);
+        finalizeQueueAddition(song);
       }
     }
 
-    function finalizeQueueAddition(song, isCtrl) {
+    function finalizeQueueAddition(song) {
       const singer = prompt("Enter Your Name (Optional):", "Guest");
       if (singer === null) return;
 
