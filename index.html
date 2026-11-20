@@ -290,12 +290,14 @@
     }
     #ctrlPreviewMount,
     #ctrlPreviewMount iframe,
-    #ctrlPreviewMount video {
+    #ctrlPreviewMount video,
+    #ctrlLiveMirrorVideo {
       width: 100%;
       height: 100%;
       border: none;
       object-fit: contain;
       pointer-events: none;
+      background: #000;
     }
   </style>
 </head>
@@ -309,6 +311,7 @@
         <input type="file" id="localFileInput" accept="video/mp4,video/quicktime,video/*" multiple style="display:none" onchange="handleLocalFiles(event)" />
         <button class="btn secondary" onclick="document.getElementById('localFileInput').click()">+ File</button>
         <button class="btn secondary" onclick="openController()">📱 Controller Mode</button>
+        <button class="btn secondary" id="btnShareStage" onclick="toggleStageMirrorBroadcast()">📡 Mirror</button>
         <button class="btn" onclick="toggleCustomFullscreen()">⛶ Stage</button>
       </div>
     </header>
@@ -408,10 +411,11 @@
     <!-- Muted Stage Preview (Controller Mode Only) -->
     <div class="ctrl-preview-wrap" id="ctrlPreviewWrap">
       <div class="ctrl-preview-header">
-        <span class="ctrl-muted-badge">🔇 MUTED STAGE PREVIEW</span>
+        <span class="ctrl-muted-badge" id="ctrlPreviewBadge">🔇 MUTED STAGE PREVIEW</span>
         <span id="ctrlPreviewSinger">On the mic: Guest</span>
       </div>
       <div class="ctrl-preview-box">
+        <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
         <div id="ctrlPreviewMount"></div>
       </div>
     </div>
@@ -464,6 +468,13 @@
     const YOUTUBE_API_KEY = 'AIzaSyDBaE3nXzMESrJslYhZsn4ssGUOpVS1WZI';
     const APP_URL = window.location.href.split('?')[0];
 
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
     let searchResults = [];
     let queue = [];
     let currentTab = 'search';
@@ -478,6 +489,13 @@
     let ctrlPreviewMediaType = null;
     let ctrlPreviewInstanceKey = null;
     let ctrlDesiredPlaying = true;
+    let currentSongCache = null;
+
+    let hostCaptureStream = null;
+    let hostPeerMap = {};
+    let guestPeer = null;
+    let guestSessionId = 'guest_' + Math.random().toString(36).slice(2, 10);
+    let isLiveMirrorConnected = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
@@ -491,6 +509,8 @@
         document.getElementById('controllerView').style.display = 'flex';
       }
 
+      initStageMirrorSignaling();
+
       db.ref('queue').on('value', (snapshot) => {
         const data = snapshot.val();
         queue = data ? Object.values(data) : [];
@@ -503,13 +523,17 @@
 
       db.ref('state/currentSong').on('value', (snapshot) => {
         const song = snapshot.val();
+        currentSongCache = song;
         if (!song || !song.id) {
           currentSongInstanceKey = null;
           ctrlPreviewInstanceKey = null;
           if (!isControllerMode) {
             renderStoppedUI();
           } else {
-            stopCtrlPreview();
+            document.getElementById('ctrlPreviewSinger').innerText = 'On the mic: Guest';
+            if (!isLiveMirrorConnected) {
+              stopCtrlPreview();
+            }
           }
           return;
         }
@@ -521,6 +545,8 @@
             startStream(song);
           }
         } else {
+          const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
+          document.getElementById('ctrlPreviewSinger').innerText = `On the mic: ${singerName}`;
           if (ctrlPreviewInstanceKey !== instanceKey) {
             ctrlPreviewInstanceKey = instanceKey;
             startMutedCtrlPreview(song);
@@ -549,7 +575,9 @@
           }
         } else {
           ctrlDesiredPlaying = Boolean(shouldPlay);
-          syncCtrlPreviewPlayState();
+          if (!isLiveMirrorConnected) {
+            syncCtrlPreviewPlayState();
+          }
         }
       });
 
@@ -574,6 +602,175 @@
         });
       }
     });
+
+    window.addEventListener('beforeunload', () => {
+      if (!isControllerMode && hostCaptureStream) {
+        db.ref('mirror').remove();
+      }
+    });
+
+    async function toggleStageMirrorBroadcast() {
+      const btn = document.getElementById('btnShareStage');
+      if (hostCaptureStream) {
+        hostCaptureStream.getTracks().forEach(t => t.stop());
+        hostCaptureStream = null;
+        Object.values(hostPeerMap).forEach(pc => pc.close());
+        hostPeerMap = {};
+        db.ref('mirror').remove();
+        btn.innerText = '📡 Mirror';
+        btn.classList.remove('danger');
+        btn.classList.add('secondary');
+        return;
+      }
+
+      try {
+        hostCaptureStream = await navigator.mediaDevices.getDisplayMedia({
+          video: { frameRate: 24, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+
+        btn.innerText = '🔴 Live';
+        btn.classList.remove('secondary');
+        btn.classList.add('danger');
+
+        hostCaptureStream.getVideoTracks()[0].onended = () => {
+          if (hostCaptureStream) toggleStageMirrorBroadcast();
+        };
+
+        await db.ref('mirror').remove();
+        await db.ref('mirror/hostActive').set(true);
+      } catch (err) {
+        alert('Screen share was cancelled or is not supported on this browser.');
+      }
+    }
+
+    function initStageMirrorSignaling() {
+      if (!isControllerMode) {
+        db.ref('mirror/requests').on('child_added', async (snap) => {
+          const guestId = snap.key;
+          if (!hostCaptureStream || !guestId) return;
+
+          if (hostPeerMap[guestId]) {
+            hostPeerMap[guestId].close();
+          }
+
+          const pc = new RTCPeerConnection(rtcConfig);
+          hostPeerMap[guestId] = pc;
+
+          hostCaptureStream.getTracks().forEach(track => pc.addTrack(track, hostCaptureStream));
+
+          pc.onicecandidate = (e) => {
+            if (e.candidate) {
+              db.ref(`mirror/sessions/${guestId}/hostCandidates`).push(e.candidate.toJSON());
+            }
+          };
+
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          await db.ref(`mirror/sessions/${guestId}/offer`).set({
+            type: offer.type,
+            sdp: offer.sdp
+          });
+
+          db.ref(`mirror/sessions/${guestId}/answer`).on('value', async (ansSnap) => {
+            const ans = ansSnap.val();
+            if (ans && !pc.currentRemoteDescription) {
+              await pc.setRemoteDescription(new RTCSessionDescription(ans));
+            }
+          });
+
+          db.ref(`mirror/sessions/${guestId}/guestCandidates`).on('child_added', async (candSnap) => {
+            const cand = candSnap.val();
+            if (cand) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+            }
+          });
+        });
+      } else {
+        db.ref('mirror/hostActive').on('value', (snap) => {
+          if (snap.val() === true) {
+            connectGuestToLiveMirror();
+          } else {
+            teardownGuestLiveMirror();
+          }
+        });
+      }
+    }
+
+    async function connectGuestToLiveMirror() {
+      teardownGuestLiveMirror();
+
+      const pc = new RTCPeerConnection(rtcConfig);
+      guestPeer = pc;
+
+      pc.ontrack = (event) => {
+        stopCtrlPreview();
+        const videoEl = document.getElementById('ctrlLiveMirrorVideo');
+        videoEl.srcObject = event.streams[0];
+        videoEl.muted = true;
+        videoEl.style.display = 'block';
+        videoEl.play().catch(() => {});
+        document.getElementById('ctrlPreviewMount').style.display = 'none';
+        document.getElementById('ctrlPreviewWrap').classList.add('active');
+        document.getElementById('ctrlPreviewBadge').innerText = '🔴 LIVE STAGE MIRROR (MUTED)';
+        isLiveMirrorConnected = true;
+      };
+
+      pc.onicecandidate = (e) => {
+        if (e.candidate) {
+          db.ref(`mirror/sessions/${guestSessionId}/guestCandidates`).push(e.candidate.toJSON());
+        }
+      };
+
+      const sessionRef = db.ref(`mirror/sessions/${guestSessionId}`);
+      await sessionRef.remove();
+      await db.ref(`mirror/requests/${guestSessionId}`).set(Date.now());
+
+      sessionRef.child('offer').on('value', async (offerSnap) => {
+        const offer = offerSnap.val();
+        if (!offer || pc.currentRemoteDescription) return;
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await sessionRef.child('answer').set({
+          type: answer.type,
+          sdp: answer.sdp
+        });
+      });
+
+      sessionRef.child('hostCandidates').on('child_added', async (candSnap) => {
+        const cand = candSnap.val();
+        if (cand) {
+          await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+        }
+      });
+    }
+
+    function teardownGuestLiveMirror() {
+      const wasConnected = isLiveMirrorConnected;
+      isLiveMirrorConnected = false;
+      if (guestPeer) {
+        guestPeer.close();
+        guestPeer = null;
+      }
+      const videoEl = document.getElementById('ctrlLiveMirrorVideo');
+      if (videoEl) {
+        videoEl.srcObject = null;
+        videoEl.style.display = 'none';
+      }
+      const mount = document.getElementById('ctrlPreviewMount');
+      if (mount) mount.style.display = 'block';
+      const badge = document.getElementById('ctrlPreviewBadge');
+      if (badge) badge.innerText = '🔇 MUTED STAGE PREVIEW';
+
+      if (wasConnected) {
+        if (currentSongCache && currentSongCache.id) {
+          startMutedCtrlPreview(currentSongCache);
+        } else {
+          stopCtrlPreview();
+        }
+      }
+    }
 
     function openController() {
       window.open(APP_URL + '?controller=true', '_blank');
@@ -952,12 +1149,6 @@
         if (typeof ctrlPreviewPlayer.setVolume === 'function') {
           ctrlPreviewPlayer.setVolume(0);
         }
-      } else if (ctrlPreviewMediaType === 'local') {
-        const pVid = document.getElementById('ctrlPreviewVideoEl');
-        if (pVid) {
-          pVid.muted = true;
-          pVid.volume = 0;
-        }
       }
     }
 
@@ -969,12 +1160,6 @@
         } else if (typeof ctrlPreviewPlayer.pauseVideo === 'function') {
           ctrlPreviewPlayer.pauseVideo();
         }
-      } else if (ctrlPreviewMediaType === 'local') {
-        const pVid = document.getElementById('ctrlPreviewVideoEl');
-        if (pVid) {
-          if (ctrlDesiredPlaying && pVid.paused) pVid.play().catch(() => {});
-          else if (!ctrlDesiredPlaying && !pVid.paused) pVid.pause();
-        }
       }
     }
 
@@ -982,12 +1167,14 @@
       ctrlPreviewMediaType = null;
       ctrlPreviewPlayer = null;
       document.getElementById('ctrlPreviewMount').innerHTML = '';
-      document.getElementById('ctrlPreviewSinger').innerText = 'On the mic: Guest';
-      document.getElementById('ctrlPreviewWrap').classList.remove('active');
+      if (!isLiveMirrorConnected) {
+        document.getElementById('ctrlPreviewWrap').classList.remove('active');
+      }
     }
 
     function startMutedCtrlPreview(song) {
-      if (song.type === 'local' || String(song.id || '').startsWith('local_')) {
+      if (isLiveMirrorConnected) return;
+      if (!song || song.type === 'local' || String(song.id || '').startsWith('local_')) {
         stopCtrlPreview();
         return;
       }
