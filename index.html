@@ -248,6 +248,55 @@
 
     /* Controller Mode Specific UI */
     #controllerView { display: none; flex-direction: column; height: 100dvh; }
+
+    /* Muted Stage Preview in Guest Controller Mode */
+    .ctrl-preview-wrap {
+      display: none;
+      flex-direction: column;
+      background: #050811;
+      border-bottom: 1px solid #1e293b;
+      padding: 8px 14px;
+    }
+    .ctrl-preview-wrap.active {
+      display: flex;
+    }
+    .ctrl-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .ctrl-muted-badge {
+      background: rgba(168, 85, 247, 0.2);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+    }
+    .ctrl-preview-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 22dvh;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+    #ctrlPreviewMount,
+    #ctrlPreviewMount iframe,
+    #ctrlPreviewMount video {
+      width: 100%;
+      height: 100%;
+      border: none;
+      object-fit: contain;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -356,6 +405,17 @@
       <button class="btn secondary" onclick="exitController()">Exit</button>
     </header>
 
+    <!-- Muted Stage Preview (Controller Mode Only) -->
+    <div class="ctrl-preview-wrap" id="ctrlPreviewWrap">
+      <div class="ctrl-preview-header">
+        <span class="ctrl-muted-badge">🔇 MUTED STAGE PREVIEW</span>
+        <span id="ctrlPreviewSinger">On the mic: Guest</span>
+      </div>
+      <div class="ctrl-preview-box">
+        <div id="ctrlPreviewMount"></div>
+      </div>
+    </div>
+
     <!-- Now Playing & Transport Controls for Guests -->
     <div class="now-playing">
       <div class="np-info">
@@ -414,6 +474,11 @@
     let isControllerMode = false;
     let currentSongInstanceKey = null;
 
+    let ctrlPreviewPlayer = null;
+    let ctrlPreviewMediaType = null;
+    let ctrlPreviewInstanceKey = null;
+    let ctrlDesiredPlaying = true;
+
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
       const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(controllerUrl)}`;
@@ -440,38 +505,51 @@
         const song = snapshot.val();
         if (!song || !song.id) {
           currentSongInstanceKey = null;
+          ctrlPreviewInstanceKey = null;
           if (!isControllerMode) {
             renderStoppedUI();
+          } else {
+            stopCtrlPreview();
           }
           return;
         }
 
         const instanceKey = `${song.id}_${song.startedAt || ''}`;
-        if (currentSongInstanceKey !== instanceKey) {
-          currentSongInstanceKey = instanceKey;
-          if (!isControllerMode) {
+        if (!isControllerMode) {
+          if (currentSongInstanceKey !== instanceKey) {
+            currentSongInstanceKey = instanceKey;
             startStream(song);
+          }
+        } else {
+          if (ctrlPreviewInstanceKey !== instanceKey) {
+            ctrlPreviewInstanceKey = instanceKey;
+            startMutedCtrlPreview(song);
           }
         }
       });
 
       db.ref('state/isPlaying').on('value', (snapshot) => {
         const shouldPlay = snapshot.val();
-        if (shouldPlay === null || isControllerMode) return;
+        if (shouldPlay === null) return;
 
-        if (activeMediaType === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-          const state = ytPlayer.getPlayerState();
-          if (shouldPlay && state !== YT.PlayerState.PLAYING) {
-            ytPlayer.playVideo();
-          } else if (!shouldPlay && state === YT.PlayerState.PLAYING) {
-            ytPlayer.pauseVideo();
+        if (!isControllerMode) {
+          if (activeMediaType === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+            const state = ytPlayer.getPlayerState();
+            if (shouldPlay && state !== YT.PlayerState.PLAYING) {
+              ytPlayer.playVideo();
+            } else if (!shouldPlay && state === YT.PlayerState.PLAYING) {
+              ytPlayer.pauseVideo();
+            }
+          } else if (activeMediaType === 'local') {
+            const vid = document.getElementById('localVideoEl');
+            if (vid) {
+              if (shouldPlay && vid.paused) vid.play();
+              else if (!shouldPlay && !vid.paused) vid.pause();
+            }
           }
-        } else if (activeMediaType === 'local') {
-          const vid = document.getElementById('localVideoEl');
-          if (vid) {
-            if (shouldPlay && vid.paused) vid.play();
-            else if (!shouldPlay && !vid.paused) vid.pause();
-          }
+        } else {
+          ctrlDesiredPlaying = Boolean(shouldPlay);
+          syncCtrlPreviewPlayState();
         }
       });
 
@@ -862,6 +940,98 @@
               if (event.data === YT.PlayerState.ENDED) {
                 playNext();
               }
+            }
+          }
+        });
+      }
+    }
+
+    function enforceMutedPreview() {
+      if (ctrlPreviewMediaType === 'youtube' && ctrlPreviewPlayer && typeof ctrlPreviewPlayer.mute === 'function') {
+        ctrlPreviewPlayer.mute();
+        if (typeof ctrlPreviewPlayer.setVolume === 'function') {
+          ctrlPreviewPlayer.setVolume(0);
+        }
+      } else if (ctrlPreviewMediaType === 'local') {
+        const pVid = document.getElementById('ctrlPreviewVideoEl');
+        if (pVid) {
+          pVid.muted = true;
+          pVid.volume = 0;
+        }
+      }
+    }
+
+    function syncCtrlPreviewPlayState() {
+      enforceMutedPreview();
+      if (ctrlPreviewMediaType === 'youtube' && ctrlPreviewPlayer && typeof ctrlPreviewPlayer.playVideo === 'function') {
+        if (ctrlDesiredPlaying) {
+          ctrlPreviewPlayer.playVideo();
+        } else if (typeof ctrlPreviewPlayer.pauseVideo === 'function') {
+          ctrlPreviewPlayer.pauseVideo();
+        }
+      } else if (ctrlPreviewMediaType === 'local') {
+        const pVid = document.getElementById('ctrlPreviewVideoEl');
+        if (pVid) {
+          if (ctrlDesiredPlaying && pVid.paused) pVid.play().catch(() => {});
+          else if (!ctrlDesiredPlaying && !pVid.paused) pVid.pause();
+        }
+      }
+    }
+
+    function stopCtrlPreview() {
+      ctrlPreviewMediaType = null;
+      ctrlPreviewPlayer = null;
+      document.getElementById('ctrlPreviewMount').innerHTML = '';
+      document.getElementById('ctrlPreviewSinger').innerText = 'On the mic: Guest';
+      document.getElementById('ctrlPreviewWrap').classList.remove('active');
+    }
+
+    function startMutedCtrlPreview(song) {
+      if (song.type === 'local' || String(song.id || '').startsWith('local_')) {
+        stopCtrlPreview();
+        return;
+      }
+
+      const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
+      document.getElementById('ctrlPreviewSinger').innerText = `On the mic: ${singerName}`;
+      document.getElementById('ctrlPreviewWrap').classList.add('active');
+
+      const elapsedSec = song.startedAt
+        ? Math.max(0, Math.floor((Date.now() - Number(song.startedAt)) / 1000))
+        : 0;
+      const startSec = elapsedSec > 3 ? elapsedSec : 0;
+
+      const mount = document.getElementById('ctrlPreviewMount');
+      ctrlPreviewMediaType = 'youtube';
+      ctrlPreviewPlayer = null;
+      mount.innerHTML = `<div id="ctrlYtPreviewContainer"></div>`;
+
+      if (typeof YT !== 'undefined' && typeof YT.Player === 'function') {
+        ctrlPreviewPlayer = new YT.Player('ctrlYtPreviewContainer', {
+          videoId: song.id,
+          playerVars: {
+            autoplay: ctrlDesiredPlaying ? 1 : 0,
+            start: startSec,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            rel: 0,
+            playsinline: 1,
+            iv_load_policy: 3,
+            mute: 1
+          },
+          events: {
+            onReady: (event) => {
+              event.target.mute();
+              event.target.setVolume(0);
+              if (ctrlDesiredPlaying) {
+                event.target.playVideo();
+              } else {
+                event.target.pauseVideo();
+              }
+            },
+            onStateChange: () => {
+              enforceMutedPreview();
             }
           }
         });
