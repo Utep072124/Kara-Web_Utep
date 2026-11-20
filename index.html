@@ -48,7 +48,35 @@
       z-index: 2147483647 !important; border: none !important; background: #000 !important;
     }
 
-    .fs-next-card, .fs-qr-badge, .fs-exit-btn { display: none; }
+    .fs-next-card, .fs-mic-card, .fs-qr-badge, .fs-exit-btn { display: none; }
+
+    /* Top-Left Exit Stage Button (Above "On the mic") */
+    .stage.custom-fullscreen .fs-exit-btn, .stage:fullscreen .fs-exit-btn {
+      display: block; position: absolute;
+      top: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px);
+      z-index: 2147483647; pointer-events: auto;
+      padding: clamp(5px, 0.6vw, 10px) clamp(10px, 1.1vw, 18px);
+      font-size: clamp(0.72rem, 0.95vw, 1.05rem);
+    }
+
+    /* Top-Left "On the mic" Card (Below Exit Stage) */
+    .stage.custom-fullscreen .fs-mic-card, .stage:fullscreen .fs-mic-card {
+      display: flex; flex-direction: column; position: absolute;
+      top: clamp(56px, 8.5vh, 88px); left: clamp(12px, 2vw, 24px);
+      background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.55);
+      padding: clamp(7px, 1vw, 14px) clamp(12px, 1.5vw, 20px);
+      border-radius: clamp(10px, 1vw, 14px); z-index: 2147483647;
+      max-width: clamp(220px, 30vw, 460px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+    }
+    .fs-mic-label {
+      font-size: clamp(0.58rem, 0.85vw, 0.95rem); color: var(--accent2);
+      font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;
+    }
+    .fs-mic-singer {
+      font-size: clamp(0.85rem, 1.35vw, 1.5rem); color: #fff;
+      font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
 
     /* Responsive Bottom-Left "Next Song" Card */
     .stage.custom-fullscreen .fs-next-card, .stage:fullscreen .fs-next-card {
@@ -60,7 +88,6 @@
       max-width: clamp(280px, 34vw, 560px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.7);
     }
-
     .fs-next-title {
       font-size: clamp(0.6rem, 0.9vw, 1rem); color: var(--accent);
       font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px;
@@ -74,10 +101,10 @@
       font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* Responsive Bottom-Right Small QR Badge with "GUEST QR" label */
+    /* Top-Right QR Badge with "GUEST QR" label */
     .stage.custom-fullscreen .fs-qr-badge, .stage:fullscreen .fs-qr-badge {
       display: flex; flex-direction: column; align-items: center; position: absolute;
-      bottom: clamp(12px, 2vh, 28px); right: clamp(12px, 2vw, 28px);
+      top: clamp(12px, 2vh, 24px); right: clamp(12px, 2vw, 24px);
       background: rgba(255, 255, 255, 0.96); padding: clamp(5px, 0.6vw, 10px);
       border-radius: clamp(8px, 0.8vw, 14px); z-index: 2147483647;
       box-shadow: 0 6px 24px rgba(0,0,0,0.75);
@@ -89,15 +116,6 @@
     .fs-qr-label {
       font-size: clamp(0.48rem, 0.72vw, 0.95rem); font-weight: 800;
       color: #111; margin-top: 3px; letter-spacing: 0.03em;
-    }
-
-    /* Responsive Exit Stage Button */
-    .stage.custom-fullscreen .fs-exit-btn, .stage:fullscreen .fs-exit-btn {
-      display: block; position: absolute;
-      top: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px);
-      z-index: 2147483647; pointer-events: auto;
-      padding: clamp(6px, 0.7vw, 12px) clamp(12px, 1.2vw, 20px);
-      font-size: clamp(0.75rem, 1vw, 1.1rem);
     }
 
     /* Standby Screen Overlay */
@@ -244,8 +262,14 @@
 
     <!-- Video Player Stage -->
     <div class="stage" id="playerStage">
-      <!-- Exit Fullscreen Button (Top-Left) -->
+      <!-- Exit Fullscreen Button (Top-Left, Above "On the mic") -->
       <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
+
+      <!-- Top-Left "On the mic" Card (Below Exit Stage) -->
+      <div class="fs-mic-card" id="fsMicCard">
+        <div class="fs-mic-label">On the mic</div>
+        <div class="fs-mic-singer" id="fsMicSinger">Guest</div>
+      </div>
 
       <!-- Bottom-Left "Next Song" Card -->
       <div class="fs-next-card">
@@ -254,7 +278,7 @@
         <div class="fs-next-singer" id="fsNextSingerName"></div>
       </div>
 
-      <!-- Right Lower Corner Small QR Badge with "GUEST QR" label -->
+      <!-- Top-Right QR Badge with "GUEST QR" label -->
       <div class="fs-qr-badge">
         <img class="qrImgTag" alt="Scan QR" />
         <div class="fs-qr-label">GUEST QR</div>
@@ -281,7 +305,7 @@
         <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
 
         <div class="standby-title">KARA-WEB UTEP</div>
-        <div class="standby-subtitle">Scan the Guest QR at the bottom-right to reserve songs</div>
+        <div class="standby-subtitle">Scan the Guest QR at the top-right to reserve songs</div>
       </div>
 
       <!-- Active Video Container -->
@@ -792,13 +816,16 @@
       activeMediaType = null;
       ytPlayer = null;
       document.getElementById('npTitle').innerText = 'No song playing';
+      document.getElementById('fsMicSinger').innerText = 'Guest';
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
     }
 
     function startStream(song) {
-      const displayTitle = `${song.title} (Queue by: ${song.singer || 'Guest'})`;
+      const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
+      const displayTitle = `${song.title} (Queue by: ${singerName})`;
       document.getElementById('npTitle').innerText = displayTitle;
+      document.getElementById('fsMicSinger').innerText = singerName;
       db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
       const mount = document.getElementById('mediaMount');
@@ -835,3 +862,6 @@
   </script>
 </body>
 </html>
+```[cite: 5]
+
+Once you deploy this updated `index.html` and verify the stage layout, we'll be ready to add the **muted preview** inside Controller / Guest mode.
