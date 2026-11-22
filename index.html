@@ -659,6 +659,19 @@
 
           hostCaptureStream.getTracks().forEach(track => pc.addTrack(track, hostCaptureStream));
 
+          // Force H.264 codec priority so iOS Safari decodes Chrome screen-share streams
+          if (typeof RTCRtpSender !== 'undefined' && RTCRtpSender.getCapabilities) {
+            const videoCaps = RTCRtpSender.getCapabilities('video');
+            if (videoCaps && videoCaps.codecs) {
+              const h264Codecs = videoCaps.codecs.filter(c => c.mimeType.toLowerCase() === 'video/h264');
+              const otherCodecs = videoCaps.codecs.filter(c => c.mimeType.toLowerCase() !== 'video/h264');
+              const transceiver = pc.getTransceivers().find(t => t.sender && t.sender.track && t.sender.track.kind === 'video');
+              if (transceiver && typeof transceiver.setCodecPreferences === 'function' && h264Codecs.length > 0) {
+                transceiver.setCodecPreferences([...h264Codecs, ...otherCodecs]);
+              }
+            }
+          }
+
           pc.onicecandidate = (e) => {
             if (e.candidate) {
               db.ref(`mirror/sessions/${guestId}/hostCandidates`).push(e.candidate.toJSON());
@@ -706,8 +719,10 @@
       pc.ontrack = (event) => {
         stopCtrlPreview();
         const videoEl = document.getElementById('ctrlLiveMirrorVideo');
-        videoEl.srcObject = event.streams[0];
+        videoEl.setAttribute('playsinline', '');
+        videoEl.setAttribute('muted', '');
         videoEl.muted = true;
+        videoEl.srcObject = event.streams[0];
         videoEl.style.display = 'block';
         videoEl.play().catch(() => {});
         document.getElementById('ctrlPreviewMount').style.display = 'none';
