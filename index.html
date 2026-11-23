@@ -25,149 +25,459 @@
       --text: #f8fafc;
       --muted: #64748b;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
 
     header {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      padding: 8px 14px; background: #030816; border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #030816;
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
+
     .brand {
-      font-weight: 800; font-size: 1.02rem; letter-spacing: 0.04em;
+      font-weight: 800;
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       white-space: nowrap;
     }
-    .header-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
-    /* Video Stage (Normal Mode) */
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .status-banner {
+      background: #060e22;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      text-align: center;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent), #0284c7);
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-weight: 600;
+      font-size: 0.76rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn.secondary { background: #0f1c3f; color: var(--accent); border: 1px solid var(--border); }
+    .btn.danger { background: #dc2626; color: #fff; }
+    .btn.glass { background: rgba(8, 17, 41, 0.88); border: 1px solid rgba(0, 210, 255, 0.35); color: #fff; }
+
+    /* Shared Song Info Cards (Current Song + Next Song Queue By) */
+    .song-cards-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #040916;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .song-info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 10px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .song-card-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .song-card-label.next {
+      color: var(--accent2);
+    }
+
+    .song-card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-card-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    /* Transport Controls: Play, Pause, Stop, Next */
+    .transport-dock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #050b1c;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .t-btn {
+      flex: 1;
+      max-width: 110px;
+      background: #0c1b40;
+      border: 1.5px solid var(--border);
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 8px 0;
+      border-radius: 10px;
+      box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .t-btn:active {
+      transform: scale(0.96);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Stage & Live/Mirror Preview Container */
+    .stage-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      margin: 8px 12px 0;
+      flex-shrink: 0;
+      min-height: 0;
+    }
+
+    .preview-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 210, 255, 0.12);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.66rem;
+      letter-spacing: 0.04em;
+    }
+
+    .preview-badge.lost {
+      background: rgba(220, 38, 38, 0.18);
+      color: #fca5a5;
+      border-color: rgba(220, 38, 38, 0.6);
+    }
+
+    .preview-mic-tag {
+      color: #cbd5e1;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .stage {
-      position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 36dvh;
-      background: #000; display: flex; align-items: center; justify-content: center;
-      border-bottom: 1px solid var(--border); overflow: hidden;
-    }
-    #ytPlayerContainer, #ytPlayerContainer iframe, video {
-      width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: auto;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 24dvh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 0 18px rgba(0, 210, 255, 0.12);
     }
 
-    /* Custom Fullscreen Stage Mode */
-    .stage.custom-fullscreen, .stage:fullscreen {
-      position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-      width: 100vw !important; height: 100vh !important; max-height: none !important;
-      z-index: 2147483647 !important; border: none !important; background: #000 !important;
+    #ytPlayerContainer,
+    #ytPlayerContainer iframe,
+    #ctrlPreviewMount,
+    #ctrlPreviewMount iframe,
+    #ctrlPreviewMount video,
+    #ctrlLiveMirrorVideo,
+    video {
+      width: 100%;
+      height: 100%;
+      border: none;
+      object-fit: contain;
+      background: #000;
     }
 
-    .fs-next-card, .fs-mic-card, .fs-qr-badge, .fs-exit-btn { display: none; }
+    #ctrlPreviewMount,
+    #ctrlPreviewMount iframe,
+    #ctrlPreviewMount video,
+    #ctrlLiveMirrorVideo {
+      pointer-events: none;
+    }
 
-    /* Top-Left Exit Stage Button */
-    .stage.custom-fullscreen .fs-exit-btn, .stage:fullscreen .fs-exit-btn {
-      display: block; position: absolute;
-      top: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px);
-      z-index: 2147483647; pointer-events: auto;
+    /* Fullscreen Stage Mode */
+    .stage.custom-fullscreen,
+    .stage:fullscreen {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      z-index: 2147483647 !important;
+      border: none !important;
+      background: #000 !important;
+    }
+
+    .fs-next-card,
+    .fs-mic-card,
+    .fs-qr-badge,
+    .fs-exit-btn {
+      display: none;
+    }
+
+    .stage.custom-fullscreen .fs-exit-btn,
+    .stage:fullscreen .fs-exit-btn {
+      display: block;
+      position: absolute;
+      top: clamp(12px, 2vh, 24px);
+      left: clamp(12px, 2vw, 24px);
+      z-index: 2147483647;
+      pointer-events: auto;
       padding: clamp(5px, 0.6vw, 10px) clamp(10px, 1.1vw, 18px);
       font-size: clamp(0.72rem, 0.95vw, 1.05rem);
     }
 
-    /* Top-Left "On the mic" Card */
-    .stage.custom-fullscreen .fs-mic-card, .stage:fullscreen .fs-mic-card {
-      display: flex; flex-direction: column; position: absolute;
-      top: clamp(56px, 8.5vh, 88px); left: clamp(12px, 2vw, 24px);
-      background: rgba(8, 17, 41, 0.94); border: 1px solid rgba(168, 85, 247, 0.65);
+    .stage.custom-fullscreen .fs-mic-card,
+    .stage:fullscreen .fs-mic-card {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: clamp(56px, 8.5vh, 88px);
+      left: clamp(12px, 2vw, 24px);
+      background: rgba(8, 17, 41, 0.94);
+      border: 1px solid rgba(168, 85, 247, 0.65);
       padding: clamp(7px, 1vw, 14px) clamp(12px, 1.5vw, 20px);
-      border-radius: clamp(10px, 1vw, 14px); z-index: 2147483647;
+      border-radius: clamp(10px, 1vw, 14px);
+      z-index: 2147483647;
       max-width: clamp(220px, 30vw, 460px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.75);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
     }
+
     .fs-mic-label {
-      font-size: clamp(0.58rem, 0.85vw, 0.95rem); color: var(--accent2);
-      font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;
+      font-size: clamp(0.58rem, 0.85vw, 0.95rem);
+      color: var(--accent2);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
     }
+
     .fs-mic-singer {
-      font-size: clamp(0.85rem, 1.35vw, 1.5rem); color: #fff;
-      font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: clamp(0.85rem, 1.35vw, 1.5rem);
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Responsive Bottom-Left "Next Song" Card */
-    .stage.custom-fullscreen .fs-next-card, .stage:fullscreen .fs-next-card {
-      display: flex; flex-direction: column; position: absolute;
-      bottom: clamp(12px, 2vh, 28px); left: clamp(12px, 2vw, 28px);
-      background: rgba(8, 17, 41, 0.94); border: 1px solid rgba(0, 210, 255, 0.55);
+    .stage.custom-fullscreen .fs-next-card,
+    .stage:fullscreen .fs-next-card {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      bottom: clamp(12px, 2vh, 28px);
+      left: clamp(12px, 2vw, 28px);
+      background: rgba(8, 17, 41, 0.94);
+      border: 1px solid rgba(0, 210, 255, 0.55);
       padding: clamp(8px, 1.2vw, 18px) clamp(12px, 1.8vw, 24px);
-      border-radius: clamp(10px, 1vw, 16px); z-index: 2147483647;
+      border-radius: clamp(10px, 1vw, 16px);
+      z-index: 2147483647;
       max-width: clamp(280px, 34vw, 560px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.75);
-    }
-    .fs-next-title {
-      font-size: clamp(0.6rem, 0.9vw, 1rem); color: var(--accent);
-      font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px;
-    }
-    .fs-next-song {
-      font-size: clamp(0.85rem, 1.45vw, 1.65rem); color: #fff;
-      font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
-    }
-    .fs-next-singer {
-      font-size: clamp(0.72rem, 1.1vw, 1.25rem); color: #cbd5e1;
-      font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
     }
 
-    /* Hide "On the mic" and "Next song" cards during Standby */
+    .fs-next-title {
+      font-size: clamp(0.6rem, 0.9vw, 1rem);
+      color: var(--accent);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
+    }
+
+    .fs-next-song {
+      font-size: clamp(0.85rem, 1.45vw, 1.65rem);
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .fs-next-singer {
+      font-size: clamp(0.72rem, 1.1vw, 1.25rem);
+      color: #cbd5e1;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .stage.is-standby .fs-mic-card,
     .stage.is-standby .fs-next-card {
       display: none !important;
     }
 
-    /* Top-Right QR Badge with "GUEST QR" label */
-    .stage.custom-fullscreen .fs-qr-badge, .stage:fullscreen .fs-qr-badge {
-      display: flex; flex-direction: column; align-items: center; position: absolute;
-      top: clamp(12px, 2vh, 24px); right: clamp(12px, 2vw, 24px);
-      background: rgba(255, 255, 255, 0.96); padding: clamp(5px, 0.6vw, 10px);
-      border-radius: clamp(8px, 0.8vw, 14px); z-index: 2147483647;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.75);
-      width: clamp(64px, 7.5vw, 135px); text-align: center;
+    .stage.custom-fullscreen .fs-qr-badge,
+    .stage:fullscreen .fs-qr-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: absolute;
+      top: clamp(12px, 2vh, 24px);
+      right: clamp(12px, 2vw, 24px);
+      background: rgba(255, 255, 255, 0.96);
+      padding: clamp(5px, 0.6vw, 10px);
+      border-radius: clamp(8px, 0.8vw, 14px);
+      z-index: 2147483647;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.75);
+      width: clamp(64px, 7.5vw, 135px);
+      text-align: center;
     }
-    .stage.custom-fullscreen .fs-qr-badge img, .stage:fullscreen .fs-qr-badge img {
-      width: 100%; height: auto; aspect-ratio: 1 / 1; display: block; border-radius: 4px;
+
+    .stage.custom-fullscreen .fs-qr-badge img,
+    .stage:fullscreen .fs-qr-badge img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      display: block;
+      border-radius: 4px;
     }
+
     .fs-qr-label {
-      font-size: clamp(0.48rem, 0.72vw, 0.95rem); font-weight: 800;
-      color: #111; margin-top: 3px; letter-spacing: 0.03em;
+      font-size: clamp(0.48rem, 0.72vw, 0.95rem);
+      font-weight: 800;
+      color: #111;
+      margin-top: 3px;
+      letter-spacing: 0.03em;
     }
 
-    /* Standby Screen Overlay */
-    .qr-overlay-normal {
-      position: absolute; inset: 0;
+    /* Standby Screen Overlay (Host & Guest Standby) */
+    .standby-overlay {
+      position: absolute;
+      inset: 0;
       background: radial-gradient(circle at center, #0a1938 0%, #030816 100%);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 14px; z-index: 15; overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      z-index: 15;
+      overflow: hidden;
     }
-    .qr-overlay-normal.hidden { display: none; }
 
-    /* Floating Musical Symbols */
+    .standby-overlay.hidden { display: none; }
+
     .music-symbol {
-      position: absolute; color: rgba(0, 210, 255, 0.22);
-      font-size: clamp(1.8rem, 4vw, 5rem);
-      user-select: none; pointer-events: none;
+      position: absolute;
+      color: rgba(0, 210, 255, 0.22);
+      font-size: clamp(1.4rem, 3.2vw, 4.5rem);
+      user-select: none;
+      pointer-events: none;
       animation: floatSymbol 4s ease-in-out infinite;
     }
-    .music-symbol:nth-child(1) { top: 16%; left: 20%; animation-delay: 0s; }
-    .music-symbol:nth-child(2) { top: 72%; left: 24%; animation-delay: 1.5s; color: rgba(168, 85, 247, 0.22); }
-    .music-symbol:nth-child(3) { top: 18%; right: 20%; animation-delay: 0.8s; }
-    .music-symbol:nth-child(4) { top: 68%; right: 24%; animation-delay: 2.2s; color: rgba(168, 85, 247, 0.22); }
+    .music-symbol:nth-child(1) { top: 14%; left: 16%; animation-delay: 0s; }
+    .music-symbol:nth-child(2) { top: 70%; left: 18%; animation-delay: 1.5s; color: rgba(168, 85, 247, 0.22); }
+    .music-symbol:nth-child(3) { top: 16%; right: 16%; animation-delay: 0.8s; }
+    .music-symbol:nth-child(4) { top: 68%; right: 18%; animation-delay: 2.2s; color: rgba(168, 85, 247, 0.22); }
 
     @keyframes floatSymbol {
       0% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
-      50% { transform: translateY(-16px) rotate(10deg); opacity: 0.5; }
+      50% { transform: translateY(-12px) rotate(10deg); opacity: 0.5; }
       100% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
     }
 
-    /* Animated Equalizer Sound Waves */
     .standby-anim-icon {
-      display: flex; gap: clamp(4px, 0.5vw, 9px); align-items: flex-end;
-      height: clamp(28px, 4.5vh, 64px); margin-bottom: clamp(8px, 1.4vh, 18px); z-index: 2;
+      display: flex;
+      gap: clamp(3px, 0.45vw, 8px);
+      align-items: flex-end;
+      height: clamp(20px, 3.6vh, 54px);
+      margin-bottom: clamp(6px, 1vh, 14px);
+      z-index: 2;
     }
+
     .bar {
-      width: clamp(6px, 0.7vw, 12px); background: var(--accent); border-radius: 4px;
+      width: clamp(4px, 0.6vw, 10px);
+      background: var(--accent);
+      border-radius: 4px;
       animation: pulseBar 1.2s ease-in-out infinite alternate;
     }
     .bar:nth-child(1) { animation-delay: 0.1s; height: 40%; }
@@ -182,378 +492,269 @@
       100% { transform: scaleY(1.1); opacity: 1; }
     }
 
-    /* Maximized Pulsing Logo Icon */
     .standby-logo {
-      width: clamp(84px, 12vw, 220px); height: clamp(84px, 12vw, 220px);
-      border-radius: clamp(14px, 2vw, 30px); object-fit: cover;
-      border: 2.5px solid var(--accent); z-index: 2;
-      box-shadow: 0 0 24px rgba(0,210,255,0.45);
+      width: clamp(54px, 9vw, 180px);
+      height: clamp(54px, 9vw, 180px);
+      border-radius: clamp(12px, 1.8vw, 26px);
+      object-fit: cover;
+      border: 2px solid var(--accent);
+      z-index: 2;
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.45);
       animation: pulseLogo 2s ease-in-out infinite alternate;
     }
+
     @keyframes pulseLogo {
-      0% { transform: scale(0.96); box-shadow: 0 0 14px rgba(0,210,255,0.3); }
-      100% { transform: scale(1.04); box-shadow: 0 0 34px rgba(0,210,255,0.85); }
+      0% { transform: scale(0.96); box-shadow: 0 0 12px rgba(0, 210, 255, 0.3); }
+      100% { transform: scale(1.04); box-shadow: 0 0 28px rgba(0, 210, 255, 0.85); }
     }
 
     .standby-title {
-      font-weight: 800; font-size: clamp(1.05rem, 2vw, 2.5rem);
-      color: #fff; margin-top: clamp(8px, 1.2vh, 18px); letter-spacing: 1.5px; z-index: 2;
+      font-weight: 800;
+      font-size: clamp(0.85rem, 1.8vw, 2.2rem);
+      color: #fff;
+      margin-top: clamp(6px, 1vh, 14px);
+      letter-spacing: 1.2px;
+      z-index: 2;
     }
+
     .standby-subtitle {
-      font-size: clamp(0.74rem, 1.1vw, 1.3rem); color: var(--accent);
-      margin-top: 4px; z-index: 2;
+      font-size: clamp(0.66rem, 1vw, 1.15rem);
+      color: var(--accent);
+      margin-top: 3px;
+      z-index: 2;
     }
 
-    /* Now Playing & Transport Controls Bar */
-    .now-playing {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      padding: 8px 14px; background: var(--card); border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .np-info { overflow: hidden; flex: 1; min-width: 0; }
-    .np-title { font-weight: 600; font-size: 0.84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-    .np-next-mini { font-size: 0.72rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-    .transport-btns { display: flex; gap: 6px; flex-shrink: 0; }
-
-    .media-transport-cluster {
-      display: flex; gap: 8px; width: 100%; justify-content: center;
-    }
-    .m-btn {
-      flex: 1; max-width: 120px; background: #0c1b40; border: 1.5px solid var(--border);
-      color: var(--accent); font-size: 1.05rem; font-weight: 700; padding: 8px 0;
-      border-radius: 10px; box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.06);
-      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-    }
-    .m-btn:active {
-      transform: scale(0.96); border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow);
+    .host-lost-banner {
+      display: none;
+      margin-top: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(220, 38, 38, 0.22);
+      border: 1px solid rgba(248, 113, 113, 0.7);
+      color: #fecaca;
+      font-size: 0.68rem;
+      font-weight: 700;
+      z-index: 3;
     }
 
-    .btn {
-      background: linear-gradient(135deg, var(--accent), #0284c7); color: #fff; border: none;
-      padding: 7px 11px; border-radius: 9px; font-weight: 600; font-size: 0.78rem; cursor: pointer;
-      white-space: nowrap; transition: all 0.2s ease;
-    }
-    .btn:active { transform: scale(0.96); }
-    .btn.secondary { background: #0f1c3f; color: var(--accent); border: 1px solid var(--border); }
-    .btn.danger { background: #dc2626; color: #fff; }
-    .btn.glass { background: rgba(8, 17, 41, 0.88); border: 1px solid rgba(0, 210, 255, 0.35); color: #fff; }
-
-    /* Search Bar */
-    .search-bar {
-      display: flex; gap: 8px; padding: 8px 12px; background: #040916; border-bottom: 1px solid var(--border);
-      flex-shrink: 0; align-items: center;
-    }
-    .search-icon { color: var(--accent); font-size: 1.05rem; flex-shrink: 0; }
-    .search-bar input {
-      flex: 1; min-width: 0; background: #071129; border: 1px solid var(--border); color: #fff;
-      padding: 8px 11px; border-radius: 10px; font-size: 0.9rem; outline: none;
-      box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.05);
-    }
-    .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-
-    /* Tabs */
-    .tabs { display: flex; background: #040916; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .tab {
-      flex: 1; text-align: center; padding: 8px; font-weight: 600; font-size: 0.8rem;
-      color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-    /* List Area */
-    .list-container { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 24px; }
-    .song-item {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      background: var(--card); padding: 9px 11px; border-radius: 12px; margin-bottom: 8px;
-      border: 1px solid var(--border);
-    }
-    .song-thumb { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
-    .song-meta { overflow: hidden; flex: 1; min-width: 0; }
-    .song-title { font-weight: 600; font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-    .song-artist { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .song-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .placeholder { text-align: center; color: var(--muted); padding: 18px; font-size: 0.86rem; }
-
-    .status-banner {
-      background: #060e22; border-bottom: 1px solid var(--border); color: var(--accent);
-      font-size: 0.74rem; padding: 5px 14px; text-align: center; flex-shrink: 0;
+    .host-lost-banner.visible {
+      display: inline-block;
     }
 
-    /* Shared Left / Right Pane & Reserve Panel */
-    .left-sub-panel {
+    /* Search, Tabs, and 2D Scrollable Song Lists */
+    .catalog-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      margin: 8px 12px 10px;
       background: var(--card);
       border: 1px solid var(--border);
-      box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
       border-radius: 12px;
       overflow: hidden;
+    }
+
+    .search-bar {
       display: flex;
-      flex-direction: column;
-      min-height: 0;
-      flex: 1;
-    }
-    .reserve-panel {
-      display: none;
-      flex-direction: column;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
-      border-radius: 12px;
-      padding: 10px 12px;
-      min-height: 0;
-      flex-shrink: 0;
-    }
-    .reserve-header {
-      display: flex; align-items: center; gap: 8px;
-      font-weight: 700; font-size: 0.84rem; color: #fff; text-transform: uppercase; margin-bottom: 4px;
-    }
-    .reserve-header span:first-child { color: var(--accent); font-size: 1rem; }
-    .reserve-desc {
-      font-size: 0.72rem; color: var(--muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-
-    /* Controller Mode Specific UI */
-    #controllerView { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
-    .ctrl-left-pane, .ctrl-right-pane { display: flex; flex-direction: column; min-height: 0; }
-    .ctrl-left-pane { flex: 1; }
-
-    /* Muted Stage Preview in Guest Controller Mode */
-    .ctrl-preview-wrap {
-      display: none;
-      flex-direction: column;
-      background: #050a16;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #040916;
       border-bottom: 1px solid var(--border);
-      padding: 8px 14px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .search-icon { color: var(--accent); font-size: 1rem; flex-shrink: 0; }
+
+    .search-bar input {
+      flex: 1;
+      min-width: 0;
+      background: #071129;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .tabs {
+      display: flex;
+      background: #040916;
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .ctrl-preview-wrap.active {
-      display: flex;
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-weight: 600;
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
     }
-    .ctrl-preview-header {
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* Scrollable both horizontally and vertically upon reaching border limits */
+    .list-container {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 8px 10px 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .song-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
+      background: #0b1736;
+      padding: 8px 10px;
+      border-radius: 10px;
       margin-bottom: 6px;
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-    .ctrl-preview-header span:last-child {
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .ctrl-muted-badge {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(0, 210, 255, 0.1);
-      color: var(--accent);
       border: 1px solid var(--border);
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 0.68rem;
-      letter-spacing: 0.04em;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .song-thumb {
+      width: 52px;
+      height: 38px;
+      border-radius: 6px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #000;
+    }
+
+    .song-meta {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .song-title {
+      font-weight: 600;
+      font-size: 0.84rem;
+      white-space: nowrap;
+      margin-bottom: 2px;
+    }
+
+    .song-artist {
+      font-size: 0.7rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .song-actions {
+      display: flex;
+      gap: 6px;
       flex-shrink: 0;
     }
-    .ctrl-preview-box {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      max-height: 22dvh;
-      background: #000;
-      border-radius: 10px;
+
+    .placeholder {
+      text-align: center;
+      color: var(--muted);
+      padding: 16px;
+      font-size: 0.84rem;
+    }
+
+    /* Unified Portrait Flow (Both Host and Guest Controller) */
+    .unified-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
       overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    #ctrlPreviewMount,
-    #ctrlPreviewMount iframe,
-    #ctrlPreviewMount video,
-    #ctrlLiveMirrorVideo {
-      width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: none; background: #000;
     }
 
-    /* Cyberpunk HUD Overlay for Mirror Preview */
-    .cyber-mirror-overlay {
-      position: absolute; inset: 0; pointer-events: none;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(circle at center, transparent 35%, rgba(3,8,22,0.65) 100%);
-      z-index: 5;
-    }
-    .cyber-muted-prompt-icon {
-      font-size: 2.6rem; color: rgba(0, 210, 255, 0.35);
-      filter: drop-shadow(0 0 10px var(--accent-glow)); margin-bottom: 8px;
-    }
-    .cyber-mirror-text {
-      font-weight: 800; font-size: 1rem; color: #fff; letter-spacing: 1.5px;
-      text-transform: uppercase; text-shadow: 0 0 8px var(--accent-glow); margin-bottom: 2px;
-    }
-    .cyber-mirror-aspect {
-      font-size: 0.76rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; opacity: 0.75;
+    #controllerView {
+      display: none;
     }
 
-    /* Host Two-Column Cybernetic Layout on Wide / Landscape Screens */
-    @media (orientation: landscape) and (max-height: 620px) and (min-width: 640px) {
-      #hostView[style*="display: flex"] {
+    /* Unified Landscape Two-Column Layout (Host & Guest Controller Identical) */
+    @media (orientation: landscape) and (min-width: 640px) {
+      .unified-shell[data-active-view="true"] {
         display: grid !important;
-        grid-template-columns: minmax(290px, 34%) 1fr;
+        grid-template-columns: minmax(290px, 36%) 1fr;
         grid-template-rows: auto auto 1fr;
         height: 100dvh;
         overflow: hidden;
-        background: var(--bg);
       }
-      #hostView > header {
+
+      .unified-shell > header {
         grid-column: 1 / -1;
         grid-row: 1;
-        padding: 6px 14px;
       }
-      #hostView > .status-banner {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        padding: 4px 14px;
-      }
-      #hostView .host-left-pane {
-        grid-column: 1;
-        grid-row: 3;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 8px 12px;
-        min-height: 0;
-        overflow: hidden;
-        border-right: 1px solid var(--border);
-      }
-      #hostView .host-left-pane .list-container {
-        padding: 8px;
-      }
-      #hostView .host-left-pane .song-item {
-        padding: 7px 9px;
-        margin-bottom: 6px;
-        border-radius: 9px;
-      }
-      #hostView .host-left-pane .reserve-panel {
-        display: flex;
-      }
-      #hostView .host-right-pane {
-        grid-column: 2;
-        grid-row: 3;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 8px 12px;
-        min-height: 0;
-        overflow: hidden;
-      }
-      #hostView .stage {
-        flex: 1;
-        min-height: 0;
-        max-height: none;
-        aspect-ratio: auto;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.12);
-      }
-      #hostView .now-playing {
-        background: var(--card);
-        border: 1px solid var(--border);
-        box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
-        border-radius: 12px;
-        padding: 8px 12px;
-        flex-shrink: 0;
-      }
-      #hostView .np-info {
-        max-width: 240px;
-      }
-    }
 
-    /* Controller Two-Column Cybernetic Layout on Landscape Screens */
-    @media (orientation: landscape) and (max-height: 620px) and (min-width: 640px) {
-      #controllerView[style*="display: flex"] {
-        display: grid !important;
-        grid-template-columns: minmax(280px, 32%) 1fr;
-        grid-template-rows: auto 1fr;
-        height: 100dvh;
+      .unified-shell > .status-banner {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      /* Left Column: Search + Tabs + Full-Height Scrollable Song List (Reserve card removed) */
+      .unified-shell .catalog-pane {
+        grid-column: 1;
+        grid-row: 3;
+        margin: 8px 6px 10px 10px;
+        min-height: 0;
+        height: auto;
+      }
+
+      /* Right Column: Enlarged Stage/Mirror + Current & Next Song Cards + Transport Buttons */
+      .unified-shell .right-stage-col {
+        grid-column: 2;
+        grid-row: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 8px 10px 10px 6px;
+        min-height: 0;
         overflow: hidden;
       }
-      #controllerView > header {
-        grid-column: 1 / -1;
-        padding: 6px 14px;
-        background: #030816;
-      }
-      #controllerView .ctrl-left-pane {
-        grid-column: 1;
-        grid-row: 2;
-        overflow-y: auto;
-        border-right: 1px solid var(--border);
-        background: #030816;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 8px 12px;
-      }
-      #controllerView .ctrl-left-pane .list-container {
-        padding: 8px;
-      }
-      #controllerView .ctrl-left-pane .song-item {
-        margin-bottom: 6px; padding: 6px 8px; border-radius: 8px;
-      }
-      #controllerView .ctrl-left-pane .reserve-panel {
-        display: flex;
-      }
-      #controllerView .ctrl-right-pane {
-        grid-column: 2;
-        grid-row: 2;
-        padding: 8px 12px;
-        gap: 8px;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        background: #030816;
-      }
-      #controllerView .ctrl-preview-wrap {
-        display: flex;
-        flex-direction: column;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 8px 12px;
+
+      .unified-shell .stage-panel {
+        margin: 0;
         flex: 1;
         min-height: 0;
-        box-shadow: 0 0 16px rgba(0, 210, 255, 0.04);
       }
-      #controllerView .ctrl-preview-header {
-        display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
-      }
-      #controllerView .ctrl-preview-header span:last-child {
-        background: #0f1c3f; border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px;
-        color: #fff; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
-      }
-      #controllerView .ctrl-preview-box {
+
+      .unified-shell .stage {
         flex: 1;
+        min-height: 0;
         max-height: none;
         aspect-ratio: auto;
+      }
+
+      .unified-shell .song-cards-row {
+        padding: 0;
+        background: transparent;
+        border-bottom: none;
+      }
+
+      .unified-shell .transport-dock {
+        padding: 6px 10px;
+        background: var(--card);
         border: 1px solid var(--border);
-        box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.15);
         border-radius: 10px;
       }
-      #controllerView .now-playing {
-        background: var(--card);
-        border: 1px solid var(--border);
-        box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
-        border-radius: 12px;
-        padding: 10px 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-        flex-shrink: 0;
-      }
-      #controllerView .np-info { display: none; }
     }
   </style>
 </head>
 <body>
 
   <!-- HOST VIEW -->
-  <div id="hostView" style="display:flex; flex-direction:column; height:100dvh;">
+  <div id="hostView" class="unified-shell" data-active-view="true">
     <header>
       <div class="brand">KARA-WEB UTEP (HOST)</div>
       <div class="header-actions">
@@ -565,179 +766,190 @@
       </div>
     </header>
 
-    <div id="statusBanner" class="status-banner">Host Stage Ready — Waiting for Queue</div>
+    <div id="statusBanner" class="status-banner">Host Stage Ready — Standby Mode</div>
 
-    <div class="host-left-pane" style="display:flex; flex-direction:column; flex:1; min-height:0;">
-      <div class="left-sub-panel">
-        <!-- Search Input Bar -->
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
-          <button class="btn" onclick="searchYouTube()">Search</button>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-          <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
-          <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
-        </div>
-
-        <!-- Lists -->
-        <div class="list-container" id="listContainer">
-          <div class="placeholder"><p>Type a song above and tap Search</p></div>
-        </div>
+    <!-- Left Column (Landscape) / Lower Section (Portrait): Search, Tabs & Scrollable List -->
+    <div class="catalog-pane">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+        <button class="btn" onclick="searchYouTube()">Search</button>
       </div>
 
-      <!-- Reserve Summary Card (Landscape Left Column) -->
-      <div class="reserve-panel">
-        <div class="reserve-header">
-          <span>📁</span>
-          <span>Reserve</span>
-        </div>
-        <div class="reserve-desc" id="hostReserveContent">Reserved Content is Empty</div>
+      <div class="tabs">
+        <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
+        <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
+      </div>
+
+      <div class="list-container" id="listContainer">
+        <div class="placeholder"><p>Type a song above and tap Search</p></div>
       </div>
     </div>
 
-    <div class="host-right-pane" style="display:flex; flex-direction:column; min-height:0;">
-      <!-- Video Player Stage -->
-      <div class="stage is-standby" id="playerStage">
-        <!-- Exit Fullscreen Button -->
-        <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
-
-        <!-- Top-Left "On the mic" Card -->
-        <div class="fs-mic-card" id="fsMicCard">
-          <div class="fs-mic-label">On the mic</div>
-          <div class="fs-mic-singer" id="fsMicSinger">Guest</div>
+    <!-- Right Column (Landscape) / Upper Section (Portrait): Current & Next Cards + Transport + Live Stage -->
+    <div class="right-stage-col" style="display:flex; flex-direction:column; min-height:0;">
+      <!-- Current Song & Next Song Cards -->
+      <div class="song-cards-row">
+        <div class="song-info-card">
+          <div class="song-card-label">Current Song</div>
+          <div class="song-card-title" id="npTitle">No song playing</div>
+          <div class="song-card-sub" id="hostCurrentSinger">On the mic: Guest</div>
         </div>
-
-        <!-- Bottom-Left "Next Song" Card -->
-        <div class="fs-next-card">
-          <div class="fs-next-title">Next song</div>
-          <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
-          <div class="fs-next-singer" id="fsNextSingerName"></div>
+        <div class="song-info-card">
+          <div class="song-card-label next">Next Song</div>
+          <div class="song-card-title" id="hostNextTitle">No song reserved</div>
+          <div class="song-card-sub" id="hostNextQueueBy">Queue by: -</div>
         </div>
-
-        <!-- Top-Right QR Badge with "GUEST QR" label -->
-        <div class="fs-qr-badge">
-          <img class="qrImgTag" alt="Scan QR" />
-          <div class="fs-qr-label">GUEST QR</div>
-        </div>
-
-        <!-- Normal Mode Interlude / Standby Screen Overlay -->
-        <div class="qr-overlay-normal" id="normalQrOverlay">
-          <div class="music-symbol">𝄞</div>
-          <div class="music-symbol">♯</div>
-          <div class="music-symbol">♫</div>
-          <div class="music-symbol">♪</div>
-
-          <!-- Animated Equalizer Bars Placed ABOVE Logo -->
-          <div class="standby-anim-icon">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-          </div>
-
-          <!-- Maximized Pulsing Logo -->
-          <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
-
-          <div class="standby-title">KARA-WEB UTEP</div>
-          <div class="standby-subtitle">Scan the Guest QR at the top-right to reserve songs</div>
-        </div>
-
-        <!-- Active Video Container -->
-        <div id="mediaMount" style="width:100%; height:100%;"></div>
       </div>
 
-      <!-- Now Playing & Transport Controls -->
-      <div class="now-playing">
-        <div class="np-info">
-          <span class="np-title" id="npTitle">No song playing</span>
-          <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
+      <!-- Play, Pause, Stop, Next -->
+      <div class="transport-dock">
+        <button class="t-btn" onclick="ensurePlaying()" title="Play">▶ <span>Play</span></button>
+        <button class="t-btn" onclick="ensurePaused()" title="Pause">⏸ <span>Pause</span></button>
+        <button class="t-btn" onclick="stopPlayback()" title="Stop">⏹ <span>Stop</span></button>
+        <button class="t-btn" onclick="playNext()" title="Next">⏭ <span>Next</span></button>
+      </div>
+
+      <!-- Live Stage -->
+      <div class="stage-panel">
+        <div class="preview-top-bar">
+          <span class="preview-badge" id="hostStageBadge">🎬 LIVE STAGE</span>
+          <span class="preview-mic-tag" id="npNextMini">Up Next: Queue is empty</span>
         </div>
-        <div class="media-transport-cluster">
-          <button class="m-btn" onclick="togglePlayPause()" title="Previous / Reload">⏪</button>
-          <button class="m-btn" onclick="togglePlayPause()" title="Play / Pause">▶</button>
-          <button class="m-btn" onclick="stopPlayback()" title="Stop">⏹</button>
-          <button class="m-btn" onclick="playNext()" title="Next / Forward">⏩</button>
+
+        <div class="stage is-standby" id="playerStage">
+          <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
+
+          <div class="fs-mic-card" id="fsMicCard">
+            <div class="fs-mic-label">On the mic</div>
+            <div class="fs-mic-singer" id="fsMicSinger">Guest</div>
+          </div>
+
+          <div class="fs-next-card">
+            <div class="fs-next-title">Next song</div>
+            <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
+            <div class="fs-next-singer" id="fsNextSingerName"></div>
+          </div>
+
+          <div class="fs-qr-badge">
+            <img class="qrImgTag" alt="Scan QR" />
+            <div class="fs-qr-label">GUEST QR</div>
+          </div>
+
+          <!-- Standby Screen Overlay -->
+          <div class="standby-overlay" id="normalQrOverlay">
+            <div class="music-symbol">𝄞</div>
+            <div class="music-symbol">♯</div>
+            <div class="music-symbol">♫</div>
+            <div class="music-symbol">♪</div>
+
+            <div class="standby-anim-icon">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+
+            <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
+
+            <div class="standby-title">KARA-WEB UTEP</div>
+            <div class="standby-subtitle">Scan the Guest QR at the top-right to reserve songs</div>
+          </div>
+
+          <!-- Active Video Container -->
+          <div id="mediaMount" style="width:100%; height:100%;"></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- REMOTE CONTROLLER VIEW -->
-  <div id="controllerView">
+  <div id="controllerView" class="unified-shell" data-active-view="false">
     <header>
       <div class="brand">GUEST CONTROL QR</div>
-      <button class="btn secondary" onclick="exitController()">Exit</button>
+      <div class="header-actions">
+        <button class="btn secondary" onclick="exitController()">Exit</button>
+      </div>
     </header>
 
-    <!-- Column 1: Left Pane (Search, Tabs, and Reserve panels) -->
-    <div class="ctrl-left-pane">
-      <div class="left-sub-panel">
-        <!-- Search Input Bar with Icon -->
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="ctrlSearchInput" placeholder="Search..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
-          <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
-        </div>
+    <div id="ctrlStatusBanner" class="status-banner">Waiting for Host Mirror...</div>
 
-        <!-- Controller List Tabs -->
-        <div class="tabs">
-          <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
-          <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
-        </div>
-
-        <!-- Controller Scrollable Lists -->
-        <div class="list-container" id="ctrlListContainer">
-          <div class="placeholder"><p>Search songs to add to queue</p></div>
-        </div>
+    <!-- Left Column (Landscape) / Lower Section (Portrait): Search, Tabs & Scrollable List -->
+    <div class="catalog-pane">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="ctrlSearchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
+        <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
       </div>
 
-      <!-- Bottom Cyberpunk Reserve Card -->
-      <div class="reserve-panel">
-        <div class="reserve-header">
-          <span>📁</span>
-          <span>Reserve</span>
-        </div>
-        <div class="reserve-desc" id="ctrlReserveContent">Reserved Content is Empty</div>
+      <div class="tabs">
+        <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
+        <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
+      </div>
+
+      <div class="list-container" id="ctrlListContainer">
+        <div class="placeholder"><p>Search songs to add to queue</p></div>
       </div>
     </div>
 
-    <!-- Column 2: Right Pane (Stage Preview and Media Control Dock) -->
-    <div class="ctrl-right-pane">
-      <div class="ctrl-preview-wrap" id="ctrlPreviewWrap">
-        <div class="ctrl-preview-header">
-          <span class="ctrl-muted-badge" id="ctrlPreviewBadge">
-            <span style="font-size:0.95rem;">📺</span>
-            <span>LIVE STAGE MIRROR (MUTED)</span>
-          </span>
-          <span onclick="exitController()">Exit</span>
+    <!-- Right Column (Landscape) / Upper Section (Portrait): Current & Next Cards + Transport + Live Mirror -->
+    <div class="right-stage-col" style="display:flex; flex-direction:column; min-height:0;">
+      <!-- Current Song & Next Song Cards -->
+      <div class="song-cards-row">
+        <div class="song-info-card">
+          <div class="song-card-label">Current Song</div>
+          <div class="song-card-title" id="ctrlNpTitle">No song playing</div>
+          <div class="song-card-sub" id="ctrlCurrentSinger">On the mic: Guest</div>
         </div>
-        <div class="ctrl-preview-box">
-          <div class="cyber-mirror-overlay" id="ctrlPreviewStandbyOverlay">
-            <div class="cyber-muted-prompt-icon">🔇</div>
-            <div class="cyber-mirror-text">LIVE PREVIEW (MUTED)</div>
-            <div class="cyber-mirror-aspect">16:9</div>
-          </div>
-          <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
-          <div id="ctrlPreviewMount"></div>
+        <div class="song-info-card">
+          <div class="song-card-label next">Next Song</div>
+          <div class="song-card-title" id="ctrlNextTitle">No song reserved</div>
+          <div class="song-card-sub" id="ctrlNextQueueBy">Queue by: -</div>
         </div>
       </div>
 
-      <!-- Player Transport Dock -->
-      <div class="now-playing">
-        <div class="np-info">
-          <span class="np-title" id="ctrlNpTitle">No song playing</span>
-          <span class="np-next-mini" id="ctrlNpNextMini">Up Next: Queue is empty</span>
+      <!-- Play, Pause, Stop, Next -->
+      <div class="transport-dock">
+        <button class="t-btn" onclick="sendControl('play')" title="Play">▶ <span>Play</span></button>
+        <button class="t-btn" onclick="sendControl('pause')" title="Pause">⏸ <span>Pause</span></button>
+        <button class="t-btn" onclick="sendControl('stop')" title="Stop">⏹ <span>Stop</span></button>
+        <button class="t-btn" onclick="sendControl('next')" title="Next">⏭ <span>Next</span></button>
+      </div>
+
+      <!-- Standby Icon Until Mirror Enabled + Live Mirror (Muted) + Host Lost Indicator -->
+      <div class="stage-panel" id="ctrlPreviewWrap">
+        <div class="preview-top-bar">
+          <span class="preview-badge" id="ctrlPreviewBadge">⏳ STANDBY (MIRROR OFF)</span>
+          <span class="preview-mic-tag" id="ctrlPreviewSinger">On the mic: Guest</span>
         </div>
-        <div class="media-transport-cluster">
-          <button class="m-btn" onclick="sendControl('playpause')" title="Previous / Reload">⏪</button>
-          <button class="m-btn" onclick="sendControl('playpause')" title="Play / Pause">▶</button>
-          <button class="m-btn" onclick="sendControl('stop')" title="Stop">⏹</button>
-          <button class="m-btn" onclick="sendControl('next')" title="Next / Forward">⏩</button>
+
+        <div class="stage" id="ctrlStageBox">
+          <!-- Standby Logo + Equalizer until Host enables Mirror -->
+          <div class="standby-overlay" id="ctrlStandbyOverlay">
+            <div class="music-symbol">𝄞</div>
+            <div class="music-symbol">♯</div>
+            <div class="music-symbol">♫</div>
+            <div class="music-symbol">♪</div>
+
+            <div class="standby-anim-icon">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+
+            <img src="icon.jpg" class="standby-logo" alt="Standby Logo" />
+            <div class="standby-title">KARA-WEB UTEP</div>
+            <div class="standby-subtitle" id="ctrlStandbySubtitle">Standby — Waiting for Host Mirror</div>
+            <div class="host-lost-banner" id="hostLostIndicator">⚠ HOST CONNECTION LOST</div>
+          </div>
+
+          <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
+          <div id="ctrlPreviewMount" style="display:none; width:100%; height:100%;"></div>
         </div>
       </div>
     </div>
@@ -777,9 +989,6 @@
     let isControllerMode = false;
     let currentSongInstanceKey = null;
 
-    let ctrlPreviewPlayer = null;
-    let ctrlPreviewMediaType = null;
-    let ctrlPreviewInstanceKey = null;
     let ctrlDesiredPlaying = true;
     let currentSongCache = null;
 
@@ -788,6 +997,8 @@
     let guestPeer = null;
     let guestSessionId = 'guest_' + Math.random().toString(36).slice(2, 10);
     let isLiveMirrorConnected = false;
+    let hostMirrorEnabled = false;
+    let hostHeartbeatTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
@@ -798,7 +1009,13 @@
       if (urlParams.get('controller') === 'true') {
         isControllerMode = true;
         document.getElementById('hostView').style.display = 'none';
+        document.getElementById('hostView').setAttribute('data-active-view', 'false');
         document.getElementById('controllerView').style.display = 'flex';
+        document.getElementById('controllerView').setAttribute('data-active-view', 'true');
+      }
+
+      if (!isControllerMode) {
+        startHostHeartbeat();
       }
 
       initStageMirrorSignaling();
@@ -818,17 +1035,16 @@
         currentSongCache = song;
         if (!song || !song.id) {
           currentSongInstanceKey = null;
-          ctrlPreviewInstanceKey = null;
           if (!isControllerMode) {
             renderStoppedUI();
           } else {
-            if (!isLiveMirrorConnected) {
-              stopCtrlPreview();
-            }
+            document.getElementById('ctrlCurrentSinger').innerText = 'On the mic: Guest';
+            document.getElementById('ctrlPreviewSinger').innerText = 'On the mic: Guest';
           }
           return;
         }
 
+        const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
         const instanceKey = `${song.id}_${song.startedAt || ''}`;
         if (!isControllerMode) {
           if (currentSongInstanceKey !== instanceKey) {
@@ -836,10 +1052,8 @@
             startStream(song);
           }
         } else {
-          if (ctrlPreviewInstanceKey !== instanceKey) {
-            ctrlPreviewInstanceKey = instanceKey;
-            startMutedCtrlPreview(song);
-          }
+          document.getElementById('ctrlCurrentSinger').innerText = `On the mic: ${singerName}`;
+          document.getElementById('ctrlPreviewSinger').innerText = `On the mic: ${singerName}`;
         }
       });
 
@@ -864,9 +1078,6 @@
           }
         } else {
           ctrlDesiredPlaying = Boolean(shouldPlay);
-          if (!isLiveMirrorConnected) {
-            syncCtrlPreviewPlayState();
-          }
         }
       });
 
@@ -877,24 +1088,83 @@
 
       db.ref('state/upNext').on('value', (snapshot) => {
         const upNextText = snapshot.val() || 'Up Next: Queue is empty';
-        document.getElementById('ctrlNpNextMini').innerText = upNextText;
+        document.getElementById('npNextMini').innerText = upNextText;
       });
+
+      if (isControllerMode) {
+        db.ref('state/tvLastSeen').on('value', (snap) => {
+          const lastSeen = Number(snap.val() || 0);
+          const isStale = !lastSeen || (Date.now() - lastSeen > 12000);
+          setHostLostState(isStale);
+        });
+
+        setInterval(() => {
+          db.ref('state/tvLastSeen').once('value', (snap) => {
+            const lastSeen = Number(snap.val() || 0);
+            const isStale = !lastSeen || (Date.now() - lastSeen > 12000);
+            setHostLostState(isStale);
+          });
+        }, 4000);
+      }
 
       if (!isControllerMode) {
         db.ref('state/command').on('value', (snapshot) => {
           const cmd = snapshot.val();
           if (!cmd) return;
-          if (cmd === 'playpause') togglePlayPause();
-          if (cmd === 'stop') stopPlayback();
-          if (cmd === 'next') playNext();
+          if (cmd === 'play') ensurePlaying();
+          else if (cmd === 'pause') ensurePaused();
+          else if (cmd === 'playpause') togglePlayPause();
+          else if (cmd === 'stop') stopPlayback();
+          else if (cmd === 'next') playNext();
           db.ref('state/command').remove();
         });
       }
     });
 
+    function startHostHeartbeat() {
+      db.ref('state/tvLastSeen').set(Date.now());
+      db.ref('state/tvLastSeen').onDisconnect().set(0);
+      hostHeartbeatTimer = setInterval(() => {
+        db.ref('state/tvLastSeen').set(Date.now());
+      }, 4000);
+    }
+
+    function setHostLostState(isLost) {
+      const lostBanner = document.getElementById('hostLostIndicator');
+      const subtitle = document.getElementById('ctrlStandbySubtitle');
+      const ctrlBanner = document.getElementById('ctrlStatusBanner');
+      const badge = document.getElementById('ctrlPreviewBadge');
+
+      if (isLost) {
+        lostBanner.classList.add('visible');
+        subtitle.innerText = 'Host signal lost — Reconnecting...';
+        ctrlBanner.innerText = '⚠ Host Lost — Waiting for Host Connection';
+        if (!isLiveMirrorConnected) {
+          badge.classList.add('lost');
+          badge.innerText = '⚠ HOST LOST';
+        }
+      } else {
+        lostBanner.classList.remove('visible');
+        if (!isLiveMirrorConnected) {
+          subtitle.innerText = hostMirrorEnabled
+            ? 'Mirror enabled — Connecting live video...'
+            : 'Standby — Waiting for Host Mirror';
+          ctrlBanner.innerText = hostMirrorEnabled
+            ? 'Host Mirror Active — Connecting...'
+            : 'Standby — Host Mirror Not Enabled';
+          badge.classList.remove('lost');
+          badge.innerText = hostMirrorEnabled ? '📡 MIRROR STARTING' : '⏳ STANDBY (MIRROR OFF)';
+        }
+      }
+    }
+
     window.addEventListener('beforeunload', () => {
-      if (!isControllerMode && hostCaptureStream) {
-        db.ref('mirror').remove();
+      if (!isControllerMode) {
+        if (hostHeartbeatTimer) clearInterval(hostHeartbeatTimer);
+        db.ref('state/tvLastSeen').set(0);
+        if (hostCaptureStream) {
+          db.ref('mirror').remove();
+        }
       }
     });
 
@@ -910,7 +1180,7 @@
         btn.innerText = '📡 Mirror';
         btn.classList.remove('danger');
         btn.classList.add('secondary');
-        banner.innerText = 'Host Stage Ready — Mirror Stopped';
+        banner.innerText = 'Host Stage Ready — Mirror Off';
         return;
       }
 
@@ -992,7 +1262,8 @@
         });
       } else {
         db.ref('mirror/hostActive').on('value', (snap) => {
-          if (snap.val() === true) {
+          hostMirrorEnabled = snap.val() === true;
+          if (hostMirrorEnabled) {
             connectGuestToLiveMirror();
           } else {
             teardownGuestLiveMirror();
@@ -1010,11 +1281,11 @@
       pc.oniceconnectionstatechange = () => {
         if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
           teardownGuestLiveMirror();
+          setHostLostState(true);
         }
       };
 
       pc.ontrack = (event) => {
-        stopCtrlPreview();
         const videoEl = document.getElementById('ctrlLiveMirrorVideo');
         videoEl.setAttribute('playsinline', '');
         videoEl.setAttribute('muted', '');
@@ -1025,10 +1296,12 @@
           videoEl.play().catch(() => {});
         };
         videoEl.play().catch(() => {});
-        document.getElementById('ctrlPreviewMount').style.display = 'none';
-        document.getElementById('ctrlPreviewStandbyOverlay').style.display = 'none';
-        document.getElementById('ctrlPreviewWrap').classList.add('active');
-        document.getElementById('ctrlPreviewBadge').innerHTML = '<span style="font-size:0.95rem;">🔴</span><span>LIVE STAGE MIRROR (MUTED)</span>';
+
+        document.getElementById('ctrlStandbyOverlay').classList.add('hidden');
+        document.getElementById('hostLostIndicator').classList.remove('visible');
+        document.getElementById('ctrlPreviewBadge').classList.remove('lost');
+        document.getElementById('ctrlPreviewBadge').innerText = '🔴 LIVE STAGE MIRROR (MUTED)';
+        document.getElementById('ctrlStatusBanner').innerText = '🔴 Live Stage Mirror Active (Muted)';
         isLiveMirrorConnected = true;
       };
 
@@ -1063,7 +1336,6 @@
     }
 
     function teardownGuestLiveMirror() {
-      const wasConnected = isLiveMirrorConnected;
       isLiveMirrorConnected = false;
       if (guestPeer) {
         guestPeer.close();
@@ -1075,19 +1347,13 @@
         videoEl.srcObject = null;
         videoEl.style.display = 'none';
       }
-      const mount = document.getElementById('ctrlPreviewMount');
-      if (mount) mount.style.display = 'block';
-      document.getElementById('ctrlPreviewStandbyOverlay').style.display = 'flex';
-      const badge = document.getElementById('ctrlPreviewBadge');
-      if (badge) badge.innerHTML = '<span style="font-size:0.95rem;">📺</span><span>LIVE STAGE MIRROR (MUTED)</span>';
-
-      if (wasConnected) {
-        if (currentSongCache && currentSongCache.id) {
-          startMutedCtrlPreview(currentSongCache);
-        } else {
-          stopCtrlPreview();
-        }
-      }
+      document.getElementById('ctrlStandbyOverlay').classList.remove('hidden');
+      document.getElementById('ctrlPreviewBadge').innerText = hostMirrorEnabled
+        ? '📡 MIRROR STARTING'
+        : '⏳ STANDBY (MIRROR OFF)';
+      document.getElementById('ctrlStatusBanner').innerText = hostMirrorEnabled
+        ? 'Host Mirror Enabled — Connecting...'
+        : 'Standby — Host Mirror Not Enabled';
     }
 
     function openController() {
@@ -1131,24 +1397,29 @@
     });
 
     function updateUpNextLabels() {
-      let mainTitle = '"No song reserved"';
-      let mainSinger = '';
+      let fsTitle = '"No song reserved"';
+      let fsSinger = '';
       let miniText = 'Up Next: Queue is empty';
-      let reserveSummary = 'Reserved Content is Empty';
+      let nextSongTitle = 'No song reserved';
+      let nextSongQueueBy = 'Queue by: -';
 
       if (queue.length > 0) {
         const nextSong = queue[0];
-        mainTitle = `"${nextSong.title}"`;
-        mainSinger = `Queue by: ${nextSong.singer || 'Guest'}`;
-        miniText = `Up Next: ${nextSong.title} (Queue by: ${nextSong.singer || 'Guest'})`;
-        reserveSummary = `Up Next: ${nextSong.title} (${nextSong.singer || 'Guest'})`;
+        const singer = nextSong.singer || 'Guest';
+        fsTitle = `"${nextSong.title}"`;
+        fsSinger = `Queue by: ${singer}`;
+        miniText = `Up Next: ${nextSong.title} (Queue by: ${singer})`;
+        nextSongTitle = nextSong.title;
+        nextSongQueueBy = `Queue by: ${singer}`;
       }
 
-      document.getElementById('fsNextSongName').innerText = mainTitle;
-      document.getElementById('fsNextSingerName').innerText = mainSinger;
+      document.getElementById('fsNextSongName').innerText = fsTitle;
+      document.getElementById('fsNextSingerName').innerText = fsSinger;
       document.getElementById('npNextMini').innerText = miniText;
-      document.getElementById('hostReserveContent').innerText = reserveSummary;
-      document.getElementById('ctrlReserveContent').innerText = reserveSummary;
+      document.getElementById('hostNextTitle').innerText = nextSongTitle;
+      document.getElementById('hostNextQueueBy').innerText = nextSongQueueBy;
+      document.getElementById('ctrlNextTitle').innerText = nextSongTitle;
+      document.getElementById('ctrlNextQueueBy').innerText = nextSongQueueBy;
 
       db.ref('state/upNext').set(miniText);
     }
@@ -1301,12 +1572,9 @@
           const div = document.createElement('div');
           div.className = 'song-item';
           div.innerHTML = `
-            <div class="song-meta" style="display:flex; align-items:center; gap:8px;">
-              <span style="color:var(--accent); font-size:1.2rem;">🎵</span>
-              <div>
-                <div class="song-title">#${idx + 1} • ${song.title}</div>
-                <div class="song-artist">${song.singer || 'Guest'} • ${song.channel}</div>
-              </div>
+            <div class="song-meta">
+              <div class="song-title">#${idx + 1} • ${song.title}</div>
+              <div class="song-artist">Queue by: ${song.singer || 'Guest'} • ${song.channel}</div>
             </div>
           `;
           container.appendChild(div);
@@ -1323,12 +1591,9 @@
         const div = document.createElement('div');
         div.className = 'song-item';
         div.innerHTML = `
-          <div class="song-meta" style="display:flex; align-items:center; gap:8px;">
-            <span style="color:var(--accent); font-size:1.2rem;">🎵</span>
-            <div>
-              <div class="song-title">${song.title}</div>
-              <div class="song-artist">${song.channel}</div>
-            </div>
+          <div class="song-meta">
+            <div class="song-title">${song.title}</div>
+            <div class="song-artist">${song.channel}</div>
           </div>
           <div class="song-actions">
             <button class="btn" onclick="promptAndQueue('${song.id}', true)">Queue</button>
@@ -1404,6 +1669,14 @@
       });
     }
 
+    function ensurePlaying() {
+      db.ref('state/isPlaying').set(true);
+    }
+
+    function ensurePaused() {
+      db.ref('state/isPlaying').set(false);
+    }
+
     function togglePlayPause() {
       db.ref('state/isPlaying').once('value', (snap) => {
         const currentlyPlaying = snap.val() !== false;
@@ -1423,6 +1696,7 @@
       activeMediaType = null;
       ytPlayer = null;
       document.getElementById('npTitle').innerText = 'No song playing';
+      document.getElementById('hostCurrentSinger').innerText = 'On the mic: Guest';
       document.getElementById('fsMicSinger').innerText = 'Guest';
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
@@ -1433,7 +1707,8 @@
     function startStream(song) {
       const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
       const displayTitle = `${song.title} (Queue by: ${singerName})`;
-      document.getElementById('npTitle').innerText = displayTitle;
+      document.getElementById('npTitle').innerText = song.title;
+      document.getElementById('hostCurrentSinger').innerText = `On the mic: ${singerName}`;
       document.getElementById('fsMicSinger').innerText = singerName;
       document.getElementById('statusBanner').innerText = `Now Playing: ${displayTitle}`;
       db.ref('state/nowPlaying').set(displayTitle);
@@ -1465,87 +1740,6 @@
               if (event.data === YT.PlayerState.ENDED) {
                 playNext();
               }
-            }
-          }
-        });
-      }
-    }
-
-    function enforceMutedPreview() {
-      if (ctrlPreviewMediaType === 'youtube' && ctrlPreviewPlayer && typeof ctrlPreviewPlayer.mute === 'function') {
-        ctrlPreviewPlayer.mute();
-        if (typeof ctrlPreviewPlayer.setVolume === 'function') {
-          ctrlPreviewPlayer.setVolume(0);
-        }
-      }
-    }
-
-    function syncCtrlPreviewPlayState() {
-      enforceMutedPreview();
-      if (ctrlPreviewMediaType === 'youtube' && ctrlPreviewPlayer && typeof ctrlPreviewPlayer.playVideo === 'function') {
-        if (ctrlDesiredPlaying) {
-          ctrlPreviewPlayer.playVideo();
-        } else if (typeof ctrlPreviewPlayer.pauseVideo === 'function') {
-          ctrlPreviewPlayer.pauseVideo();
-        }
-      }
-    }
-
-    function stopCtrlPreview() {
-      ctrlPreviewMediaType = null;
-      ctrlPreviewPlayer = null;
-      document.getElementById('ctrlPreviewMount').innerHTML = '';
-      if (!isLiveMirrorConnected) {
-        document.getElementById('ctrlPreviewWrap').classList.remove('active');
-      }
-    }
-
-    function startMutedCtrlPreview(song) {
-      if (isLiveMirrorConnected) return;
-      if (!song || song.type === 'local' || String(song.id || '').startsWith('local_')) {
-        stopCtrlPreview();
-        return;
-      }
-
-      document.getElementById('ctrlPreviewWrap').classList.add('active');
-
-      const elapsedSec = song.startedAt
-        ? Math.max(0, Math.floor((Date.now() - Number(song.startedAt)) / 1000))
-        : 0;
-      const startSec = elapsedSec > 3 ? elapsedSec : 0;
-
-      const mount = document.getElementById('ctrlPreviewMount');
-      ctrlPreviewMediaType = 'youtube';
-      ctrlPreviewPlayer = null;
-      mount.innerHTML = `<div id="ctrlYtPreviewContainer"></div>`;
-
-      if (typeof YT !== 'undefined' && typeof YT.Player === 'function') {
-        ctrlPreviewPlayer = new YT.Player('ctrlYtPreviewContainer', {
-          videoId: song.id,
-          playerVars: {
-            autoplay: ctrlDesiredPlaying ? 1 : 0,
-            start: startSec,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            rel: 0,
-            playsinline: 1,
-            iv_load_policy: 3,
-            mute: 1
-          },
-          events: {
-            onReady: (event) => {
-              event.target.mute();
-              event.target.setVolume(0);
-              document.getElementById('ctrlPreviewStandbyOverlay').style.display = 'none';
-              if (ctrlDesiredPlaying) {
-                event.target.playVideo();
-              } else {
-                event.target.pauseVideo();
-              }
-            },
-            onStateChange: () => {
-              enforceMutedPreview();
             }
           }
         });
