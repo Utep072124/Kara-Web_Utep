@@ -241,7 +241,8 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 23dvh;
+      min-height: 150px;
+      max-height: 24dvh;
       background: #000;
       display: flex;
       align-items: center;
@@ -257,7 +258,6 @@
     #ctrlPreviewMount,
     #ctrlPreviewMount iframe,
     #ctrlPreviewMount video,
-    #ctrlLiveMirrorVideo,
     video {
       width: 100%;
       height: 100%;
@@ -268,9 +268,70 @@
 
     #ctrlPreviewMount,
     #ctrlPreviewMount iframe,
-    #ctrlPreviewMount video,
-    #ctrlLiveMirrorVideo {
+    #ctrlPreviewMount video {
       pointer-events: none;
+    }
+
+    #ctrlLiveMirrorVideo {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+      pointer-events: none;
+      object-fit: contain;
+      transition: transform 0.2s ease;
+    }
+
+    #ctrlLiveMirrorVideo.rot-0 {
+      transform: rotate(0deg) scale(1);
+    }
+
+    #ctrlLiveMirrorVideo.rot-90 {
+      transform: rotate(90deg) scale(0.62);
+    }
+
+    #ctrlLiveMirrorVideo.rot-180 {
+      transform: rotate(180deg) scale(1);
+    }
+
+    #ctrlLiveMirrorVideo.rot-270 {
+      transform: rotate(270deg) scale(0.62);
+    }
+
+    /* Bottom-Right Corner Orientation Correction Buttons on Guest Live Mirror */
+    .mirror-corner-controls {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      z-index: 25;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(8, 17, 41, 0.85);
+      border: 1px solid rgba(0, 210, 255, 0.45);
+      padding: 4px 6px;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+      pointer-events: auto;
+    }
+
+    .rot-btn {
+      background: #0f1c3f;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1.2;
+      transition: all 0.15s ease;
+    }
+
+    .rot-btn:active {
+      transform: scale(0.94);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
     }
 
     /* Fullscreen Stage Mode */
@@ -794,8 +855,9 @@
       }
 
       .unified-shell .stage {
-        flex: 1;
-        min-height: 0;
+        flex: 1 1 auto;
+        height: 100%;
+        min-height: 140px;
         max-height: none;
         aspect-ratio: auto;
       }
@@ -957,7 +1019,7 @@
         <button class="t-btn" onclick="sendControl('next')" title="Next">⏭ <span>Next</span></button>
       </div>
 
-      <!-- Standby Icon Until Mirror Enabled + Live Mirror (Muted) + Host Lost Indicator -->
+      <!-- Standby Icon Until Mirror Enabled + Live Mirror (Muted) + Bottom-Right Orientation Buttons -->
       <div class="stage-panel" id="ctrlPreviewWrap">
         <div class="preview-top-bar">
           <span class="preview-badge" id="ctrlPreviewBadge">⏳ STANDBY (MIRROR OFF)</span>
@@ -987,8 +1049,15 @@
             <div class="host-lost-banner" id="hostLostIndicator">⚠ HOST CONNECTION LOST</div>
           </div>
 
-          <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
+          <video id="ctrlLiveMirrorVideo" class="rot-0" autoplay muted playsinline style="display:none;"></video>
           <div id="ctrlPreviewMount" style="display:none; width:100%; height:100%;"></div>
+
+          <!-- Orientation Correction Buttons on Bottom-Right Corner of Guest Live Mirror -->
+          <div class="mirror-corner-controls" aria-label="Mirror Orientation Controls">
+            <button class="rot-btn" type="button" onclick="rotateMirror(-90)" title="Rotate Left 90°">↺</button>
+            <button class="rot-btn" type="button" onclick="rotateMirror(90)" title="Rotate Right 90°">↻</button>
+            <button class="rot-btn" type="button" onclick="resetMirrorRotation()" title="Reset Orientation">0°</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1056,6 +1125,24 @@
     let isLiveMirrorConnected = false;
     let hostMirrorEnabled = false;
     let hostHeartbeatTimer = null;
+    let mirrorRotationDeg = 0;
+
+    function applyMirrorRotation() {
+      const videoEl = document.getElementById('ctrlLiveMirrorVideo');
+      if (!videoEl) return;
+      videoEl.classList.remove('rot-0', 'rot-90', 'rot-180', 'rot-270');
+      videoEl.classList.add(`rot-${mirrorRotationDeg}`);
+    }
+
+    function rotateMirror(delta) {
+      mirrorRotationDeg = (mirrorRotationDeg + delta + 360) % 360;
+      applyMirrorRotation();
+    }
+
+    function resetMirrorRotation() {
+      mirrorRotationDeg = 0;
+      applyMirrorRotation();
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
@@ -1306,7 +1393,7 @@
 
           db.ref(`mirror/sessions/${guestId}/guestCandidates`).on('child_added', async (candSnap) => {
             const cand = candSnap.val();
-            if (cand) {
+            if (cand && pc.remoteDescription) {
               await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
             }
           });
@@ -1329,6 +1416,8 @@
       const pc = new RTCPeerConnection(rtcConfig);
       guestPeer = pc;
 
+      const videoEl = document.getElementById('ctrlLiveMirrorVideo');
+
       pc.oniceconnectionstatechange = () => {
         if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
           teardownGuestLiveMirror();
@@ -1337,16 +1426,28 @@
       };
 
       pc.ontrack = (event) => {
-        const videoEl = document.getElementById('ctrlLiveMirrorVideo');
-        videoEl.setAttribute('playsinline', '');
-        videoEl.setAttribute('muted', '');
+        const incomingStream = (event.streams && event.streams[0])
+          ? event.streams[0]
+          : new MediaStream([event.track]);
+
         videoEl.muted = true;
-        videoEl.srcObject = event.streams[0];
+        videoEl.defaultMuted = true;
+        videoEl.autoplay = true;
+        videoEl.playsInline = true;
+        videoEl.setAttribute('muted', '');
+        videoEl.setAttribute('autoplay', '');
+        videoEl.setAttribute('playsinline', '');
         videoEl.style.display = 'block';
-        videoEl.onloadedmetadata = () => {
+        videoEl.srcObject = incomingStream;
+        applyMirrorRotation();
+
+        const tryPlay = () => {
           videoEl.play().catch(() => {});
         };
-        videoEl.play().catch(() => {});
+
+        videoEl.onloadedmetadata = tryPlay;
+        videoEl.oncanplay = tryPlay;
+        tryPlay();
 
         document.getElementById('ctrlStandbyOverlay').classList.add('hidden');
         document.getElementById('hostLostIndicator').classList.remove('visible');
@@ -1362,6 +1463,8 @@
       };
 
       const sessionRef = db.ref(`mirror/sessions/${guestSessionId}`);
+      sessionRef.child('offer').off();
+      sessionRef.child('hostCandidates').off();
       await sessionRef.remove();
       await db.ref(`mirror/requests/${guestSessionId}`).set(Date.now());
 
@@ -1379,7 +1482,7 @@
 
       sessionRef.child('hostCandidates').on('child_added', async (candSnap) => {
         const cand = candSnap.val();
-        if (cand) {
+        if (cand && pc.remoteDescription) {
           await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
         }
       });
@@ -1391,9 +1494,15 @@
         guestPeer.close();
         guestPeer = null;
       }
+      const sessionRef = db.ref(`mirror/sessions/${guestSessionId}`);
+      sessionRef.child('offer').off();
+      sessionRef.child('hostCandidates').off();
+
+      resetMirrorRotation();
       const videoEl = document.getElementById('ctrlLiveMirrorVideo');
       if (videoEl) {
         videoEl.onloadedmetadata = null;
+        videoEl.oncanplay = null;
         videoEl.srcObject = null;
         videoEl.style.display = 'none';
       }
