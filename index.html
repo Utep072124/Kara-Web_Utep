@@ -16,32 +16,42 @@
 
   <style>
     :root {
-      --bg: #0b0f19;
-      --card: #151c2c;
+      --bg: #030816;
+      --card: #081129;
+      --border: #143575;
       --accent: #00d2ff;
+      --accent-glow: rgba(0, 210, 255, 0.4);
       --accent2: #a855f7;
       --text: #f8fafc;
-      --muted: #94a3b8;
+      --muted: #64748b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 
     header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px; background: #0f1524; border-bottom: 1px solid #1e293b;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 14px; background: #030816; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    .brand { font-weight: 800; font-size: 1.05rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .header-actions { display: flex; gap: 6px; }
+    .brand {
+      font-weight: 800; font-size: 1.02rem; letter-spacing: 0.04em;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+    }
+    .header-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
     /* Video Stage (Normal Mode) */
     .stage {
-      position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 38dvh;
+      position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 36dvh;
       background: #000; display: flex; align-items: center; justify-content: center;
-      border-bottom: 1px solid #1e293b; overflow: hidden;
+      border-bottom: 1px solid var(--border); overflow: hidden;
     }
-    #ytPlayerContainer, #ytPlayerContainer iframe, video { width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: auto; }
+    #ytPlayerContainer, #ytPlayerContainer iframe, video {
+      width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: auto;
+    }
 
-    /* Custom Fullscreen Stage Mode (Compatible with Chrome, Laptop, & Android TV) */
+    /* Custom Fullscreen Stage Mode */
     .stage.custom-fullscreen, .stage:fullscreen {
       position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
       width: 100vw !important; height: 100vh !important; max-height: none !important;
@@ -50,7 +60,7 @@
 
     .fs-next-card, .fs-mic-card, .fs-qr-badge, .fs-exit-btn { display: none; }
 
-    /* Top-Left Exit Stage Button (Above "On the mic") */
+    /* Top-Left Exit Stage Button */
     .stage.custom-fullscreen .fs-exit-btn, .stage:fullscreen .fs-exit-btn {
       display: block; position: absolute;
       top: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px);
@@ -59,15 +69,15 @@
       font-size: clamp(0.72rem, 0.95vw, 1.05rem);
     }
 
-    /* Top-Left "On the mic" Card (Below Exit Stage) */
+    /* Top-Left "On the mic" Card */
     .stage.custom-fullscreen .fs-mic-card, .stage:fullscreen .fs-mic-card {
       display: flex; flex-direction: column; position: absolute;
       top: clamp(56px, 8.5vh, 88px); left: clamp(12px, 2vw, 24px);
-      background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.55);
+      background: rgba(8, 17, 41, 0.94); border: 1px solid rgba(168, 85, 247, 0.65);
       padding: clamp(7px, 1vw, 14px) clamp(12px, 1.5vw, 20px);
       border-radius: clamp(10px, 1vw, 14px); z-index: 2147483647;
       max-width: clamp(220px, 30vw, 460px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.75);
     }
     .fs-mic-label {
       font-size: clamp(0.58rem, 0.85vw, 0.95rem); color: var(--accent2);
@@ -82,11 +92,11 @@
     .stage.custom-fullscreen .fs-next-card, .stage:fullscreen .fs-next-card {
       display: flex; flex-direction: column; position: absolute;
       bottom: clamp(12px, 2vh, 28px); left: clamp(12px, 2vw, 28px);
-      background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(0, 210, 255, 0.45);
+      background: rgba(8, 17, 41, 0.94); border: 1px solid rgba(0, 210, 255, 0.55);
       padding: clamp(8px, 1.2vw, 18px) clamp(12px, 1.8vw, 24px);
       border-radius: clamp(10px, 1vw, 16px); z-index: 2147483647;
       max-width: clamp(280px, 34vw, 560px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.75);
     }
     .fs-next-title {
       font-size: clamp(0.6rem, 0.9vw, 1rem); color: var(--accent);
@@ -126,37 +136,38 @@
 
     /* Standby Screen Overlay */
     .qr-overlay-normal {
-      position: absolute; inset: 0; background: radial-gradient(circle at center, #111827 0%, #050811 100%);
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at center, #0a1938 0%, #030816 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 16px; z-index: 15; overflow: hidden;
+      text-align: center; padding: 14px; z-index: 15; overflow: hidden;
     }
     .qr-overlay-normal.hidden { display: none; }
 
-    /* Responsive Floating Musical Symbols (Treble Clef, Sharp, Notes) */
+    /* Floating Musical Symbols */
     .music-symbol {
       position: absolute; color: rgba(0, 210, 255, 0.22);
-      font-size: clamp(2rem, 4.5vw, 5.5rem);
+      font-size: clamp(1.8rem, 4vw, 5rem);
       user-select: none; pointer-events: none;
       animation: floatSymbol 4s ease-in-out infinite;
     }
-    .music-symbol:nth-child(1) { top: 18%; left: 22%; animation-delay: 0s; }
-    .music-symbol:nth-child(2) { top: 72%; left: 25%; animation-delay: 1.5s; color: rgba(168, 85, 247, 0.22); }
-    .music-symbol:nth-child(3) { top: 20%; right: 22%; animation-delay: 0.8s; }
-    .music-symbol:nth-child(4) { top: 68%; right: 25%; animation-delay: 2.2s; color: rgba(168, 85, 247, 0.22); }
+    .music-symbol:nth-child(1) { top: 16%; left: 20%; animation-delay: 0s; }
+    .music-symbol:nth-child(2) { top: 72%; left: 24%; animation-delay: 1.5s; color: rgba(168, 85, 247, 0.22); }
+    .music-symbol:nth-child(3) { top: 18%; right: 20%; animation-delay: 0.8s; }
+    .music-symbol:nth-child(4) { top: 68%; right: 24%; animation-delay: 2.2s; color: rgba(168, 85, 247, 0.22); }
 
     @keyframes floatSymbol {
       0% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
-      50% { transform: translateY(-18px) rotate(10deg); opacity: 0.5; }
+      50% { transform: translateY(-16px) rotate(10deg); opacity: 0.5; }
       100% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
     }
 
-    /* Responsive Animated Equalizer Sound Waves (Placed Above Logo) */
+    /* Animated Equalizer Sound Waves */
     .standby-anim-icon {
-      display: flex; gap: clamp(5px, 0.6vw, 10px); align-items: flex-end;
-      height: clamp(42px, 6vh, 80px); margin-bottom: clamp(14px, 2vh, 26px); z-index: 2;
+      display: flex; gap: clamp(4px, 0.5vw, 9px); align-items: flex-end;
+      height: clamp(28px, 4.5vh, 64px); margin-bottom: clamp(8px, 1.4vh, 18px); z-index: 2;
     }
     .bar {
-      width: clamp(7px, 0.8vw, 14px); background: var(--accent); border-radius: 4px;
+      width: clamp(6px, 0.7vw, 12px); background: var(--accent); border-radius: 4px;
       animation: pulseBar 1.2s ease-in-out infinite alternate;
     }
     .bar:nth-child(1) { animation-delay: 0.1s; height: 40%; }
@@ -171,91 +182,149 @@
       100% { transform: scaleY(1.1); opacity: 1; }
     }
 
-    /* Responsive Maximized Pulsing Logo Icon */
+    /* Maximized Pulsing Logo Icon */
     .standby-logo {
-      width: clamp(140px, 18vw, 260px); height: clamp(140px, 18vw, 260px);
-      border-radius: clamp(20px, 2.2vw, 34px); object-fit: cover;
-      border: 3px solid var(--accent); z-index: 2;
-      box-shadow: 0 0 30px rgba(0,210,255,0.5);
+      width: clamp(84px, 12vw, 220px); height: clamp(84px, 12vw, 220px);
+      border-radius: clamp(14px, 2vw, 30px); object-fit: cover;
+      border: 2.5px solid var(--accent); z-index: 2;
+      box-shadow: 0 0 24px rgba(0,210,255,0.45);
       animation: pulseLogo 2s ease-in-out infinite alternate;
     }
     @keyframes pulseLogo {
-      0% { transform: scale(0.96); box-shadow: 0 0 15px rgba(0,210,255,0.3); }
-      100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,210,255,0.9); }
+      0% { transform: scale(0.96); box-shadow: 0 0 14px rgba(0,210,255,0.3); }
+      100% { transform: scale(1.04); box-shadow: 0 0 34px rgba(0,210,255,0.85); }
     }
 
     .standby-title {
-      font-weight: 800; font-size: clamp(1.3rem, 2.4vw, 2.8rem);
-      color: #fff; margin-top: clamp(12px, 1.8vh, 24px); letter-spacing: 1.5px; z-index: 2;
+      font-weight: 800; font-size: clamp(1.05rem, 2vw, 2.5rem);
+      color: #fff; margin-top: clamp(8px, 1.2vh, 18px); letter-spacing: 1.5px; z-index: 2;
     }
     .standby-subtitle {
-      font-size: clamp(0.85rem, 1.3vw, 1.45rem); color: var(--accent);
-      margin-top: 6px; z-index: 2;
+      font-size: clamp(0.74rem, 1.1vw, 1.3rem); color: var(--accent);
+      margin-top: 4px; z-index: 2;
     }
 
     /* Now Playing & Transport Controls Bar */
     .now-playing {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      padding: 8px 14px; background: var(--card); border-bottom: 1px solid #1e293b;
+      padding: 8px 14px; background: var(--card); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    .np-info { overflow: hidden; flex: 1; }
-    .np-title { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .np-info { overflow: hidden; flex: 1; min-width: 0; }
+    .np-title { font-weight: 600; font-size: 0.84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
     .np-next-mini { font-size: 0.72rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-    .transport-btns { display: flex; gap: 5px; flex-shrink: 0; }
+    .transport-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .media-transport-cluster {
+      display: flex; gap: 8px; width: 100%; justify-content: center;
+    }
+    .m-btn {
+      flex: 1; max-width: 120px; background: #0c1b40; border: 1.5px solid var(--border);
+      color: var(--accent); font-size: 1.05rem; font-weight: 700; padding: 8px 0;
+      border-radius: 10px; box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.06);
+      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+    }
+    .m-btn:active {
+      transform: scale(0.96); border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow);
+    }
 
     .btn {
       background: linear-gradient(135deg, var(--accent), #0284c7); color: #fff; border: none;
-      padding: 7px 11px; border-radius: 9px; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+      padding: 7px 11px; border-radius: 9px; font-weight: 600; font-size: 0.78rem; cursor: pointer;
+      white-space: nowrap; transition: all 0.2s ease;
     }
-    .btn.secondary { background: #1e293b; color: var(--text); border: 1px solid #334155; }
-    .btn.danger { background: #dc2626; }
-    .btn.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); }
+    .btn:active { transform: scale(0.96); }
+    .btn.secondary { background: #0f1c3f; color: var(--accent); border: 1px solid var(--border); }
+    .btn.danger { background: #dc2626; color: #fff; }
+    .btn.glass { background: rgba(8, 17, 41, 0.88); border: 1px solid rgba(0, 210, 255, 0.35); color: #fff; }
 
     /* Search Bar */
     .search-bar {
-      display: flex; gap: 8px; padding: 10px 14px; background: #0f1524; border-bottom: 1px solid #1e293b;
+      display: flex; gap: 8px; padding: 8px 12px; background: #040916; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; align-items: center;
     }
+    .search-icon { color: var(--accent); font-size: 1.05rem; flex-shrink: 0; }
     .search-bar input {
-      flex: 1; background: #1e293b; border: 1px solid #334155; color: #fff;
-      padding: 9px 12px; border-radius: 10px; font-size: 0.95rem; outline: none;
+      flex: 1; min-width: 0; background: #071129; border: 1px solid var(--border); color: #fff;
+      padding: 8px 11px; border-radius: 10px; font-size: 0.9rem; outline: none;
+      box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.05);
     }
+    .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
 
     /* Tabs */
-    .tabs { display: flex; background: #0f1524; border-bottom: 1px solid #1e293b; }
+    .tabs { display: flex; background: #040916; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .tab {
-      flex: 1; text-align: center; padding: 9px; font-weight: 600; font-size: 0.82rem;
+      flex: 1; text-align: center; padding: 8px; font-weight: 600; font-size: 0.8rem;
       color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
     /* List Area */
-    .list-container { flex: 1; overflow-y: auto; padding: 10px 14px 30px; }
+    .list-container { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 24px; }
     .song-item {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      background: var(--card); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;
-      border: 1px solid #1e293b;
+      background: var(--card); padding: 9px 11px; border-radius: 12px; margin-bottom: 8px;
+      border: 1px solid var(--border);
     }
-    .song-thumb { width: 60px; height: 45px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
-    .song-meta { overflow: hidden; flex: 1; }
-    .song-title { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
-    .song-artist { font-size: 0.74rem; color: var(--muted); }
+    .song-thumb { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
+    .song-meta { overflow: hidden; flex: 1; min-width: 0; }
+    .song-title { font-weight: 600; font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .song-artist { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .song-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .placeholder { text-align: center; color: var(--muted); padding: 20px; font-size: 0.9rem; }
+    .placeholder { text-align: center; color: var(--muted); padding: 18px; font-size: 0.86rem; }
 
     .status-banner {
-      background: #1e293b; color: var(--accent); font-size: 0.76rem; padding: 5px 14px; text-align: center;
+      background: #060e22; border-bottom: 1px solid var(--border); color: var(--accent);
+      font-size: 0.74rem; padding: 5px 14px; text-align: center; flex-shrink: 0;
+    }
+
+    /* Shared Left / Right Pane & Reserve Panel */
+    .left-sub-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1;
+    }
+    .reserve-panel {
+      display: none;
+      flex-direction: column;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-height: 0;
+      flex-shrink: 0;
+    }
+    .reserve-header {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 0.84rem; color: #fff; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .reserve-header span:first-child { color: var(--accent); font-size: 1rem; }
+    .reserve-desc {
+      font-size: 0.72rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     /* Controller Mode Specific UI */
-    #controllerView { display: none; flex-direction: column; height: 100dvh; }
+    #controllerView { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
+    .ctrl-left-pane, .ctrl-right-pane { display: flex; flex-direction: column; min-height: 0; }
+    .ctrl-left-pane { flex: 1; }
 
     /* Muted Stage Preview in Guest Controller Mode */
     .ctrl-preview-wrap {
       display: none;
       flex-direction: column;
-      background: #050811;
-      border-bottom: 1px solid #1e293b;
+      background: #050a16;
+      border-bottom: 1px solid var(--border);
       padding: 8px 14px;
+      flex-shrink: 0;
     }
     .ctrl-preview-wrap.active {
       display: flex;
@@ -264,19 +333,25 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       margin-bottom: 6px;
       font-size: 0.72rem;
       color: var(--muted);
     }
+    .ctrl-preview-header span:last-child {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .ctrl-muted-badge {
-      background: rgba(168, 85, 247, 0.2);
-      color: #e9d5ff;
-      border: 1px solid rgba(168, 85, 247, 0.5);
-      padding: 2px 8px;
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0, 210, 255, 0.1);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
       border-radius: 999px;
       font-weight: 700;
       font-size: 0.68rem;
       letter-spacing: 0.04em;
+      flex-shrink: 0;
     }
     .ctrl-preview-box {
       position: relative;
@@ -286,18 +361,192 @@
       background: #000;
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #1e293b;
+      border: 1px solid var(--border);
     }
     #ctrlPreviewMount,
     #ctrlPreviewMount iframe,
     #ctrlPreviewMount video,
     #ctrlLiveMirrorVideo {
-      width: 100%;
-      height: 100%;
-      border: none;
-      object-fit: contain;
-      pointer-events: none;
-      background: #000;
+      width: 100%; height: 100%; border: none; object-fit: contain; pointer-events: none; background: #000;
+    }
+
+    /* Cyberpunk HUD Overlay for Mirror Preview */
+    .cyber-mirror-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(circle at center, transparent 35%, rgba(3,8,22,0.65) 100%);
+      z-index: 5;
+    }
+    .cyber-muted-prompt-icon {
+      font-size: 2.6rem; color: rgba(0, 210, 255, 0.35);
+      filter: drop-shadow(0 0 10px var(--accent-glow)); margin-bottom: 8px;
+    }
+    .cyber-mirror-text {
+      font-weight: 800; font-size: 1rem; color: #fff; letter-spacing: 1.5px;
+      text-transform: uppercase; text-shadow: 0 0 8px var(--accent-glow); margin-bottom: 2px;
+    }
+    .cyber-mirror-aspect {
+      font-size: 0.76rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; opacity: 0.75;
+    }
+
+    /* Host Two-Column Cybernetic Layout on Wide / Landscape Screens */
+    @media (orientation: landscape) and (max-height: 620px) and (min-width: 640px) {
+      #hostView[style*="display: flex"] {
+        display: grid !important;
+        grid-template-columns: minmax(290px, 34%) 1fr;
+        grid-template-rows: auto auto 1fr;
+        height: 100dvh;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      #hostView > header {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        padding: 6px 14px;
+      }
+      #hostView > .status-banner {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        padding: 4px 14px;
+      }
+      #hostView .host-left-pane {
+        grid-column: 1;
+        grid-row: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 12px;
+        min-height: 0;
+        overflow: hidden;
+        border-right: 1px solid var(--border);
+      }
+      #hostView .host-left-pane .list-container {
+        padding: 8px;
+      }
+      #hostView .host-left-pane .song-item {
+        padding: 7px 9px;
+        margin-bottom: 6px;
+        border-radius: 9px;
+      }
+      #hostView .host-left-pane .reserve-panel {
+        display: flex;
+      }
+      #hostView .host-right-pane {
+        grid-column: 2;
+        grid-row: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 12px;
+        min-height: 0;
+        overflow: hidden;
+      }
+      #hostView .stage {
+        flex: 1;
+        min-height: 0;
+        max-height: none;
+        aspect-ratio: auto;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.12);
+      }
+      #hostView .now-playing {
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
+        border-radius: 12px;
+        padding: 8px 12px;
+        flex-shrink: 0;
+      }
+      #hostView .np-info {
+        max-width: 240px;
+      }
+    }
+
+    /* Controller Two-Column Cybernetic Layout on Landscape Screens */
+    @media (orientation: landscape) and (max-height: 620px) and (min-width: 640px) {
+      #controllerView[style*="display: flex"] {
+        display: grid !important;
+        grid-template-columns: minmax(280px, 32%) 1fr;
+        grid-template-rows: auto 1fr;
+        height: 100dvh;
+        overflow: hidden;
+      }
+      #controllerView > header {
+        grid-column: 1 / -1;
+        padding: 6px 14px;
+        background: #030816;
+      }
+      #controllerView .ctrl-left-pane {
+        grid-column: 1;
+        grid-row: 2;
+        overflow-y: auto;
+        border-right: 1px solid var(--border);
+        background: #030816;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 12px;
+      }
+      #controllerView .ctrl-left-pane .list-container {
+        padding: 8px;
+      }
+      #controllerView .ctrl-left-pane .song-item {
+        margin-bottom: 6px; padding: 6px 8px; border-radius: 8px;
+      }
+      #controllerView .ctrl-left-pane .reserve-panel {
+        display: flex;
+      }
+      #controllerView .ctrl-right-pane {
+        grid-column: 2;
+        grid-row: 2;
+        padding: 8px 12px;
+        gap: 8px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: #030816;
+      }
+      #controllerView .ctrl-preview-wrap {
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 8px 12px;
+        flex: 1;
+        min-height: 0;
+        box-shadow: 0 0 16px rgba(0, 210, 255, 0.04);
+      }
+      #controllerView .ctrl-preview-header {
+        display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+      }
+      #controllerView .ctrl-preview-header span:last-child {
+        background: #0f1c3f; border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px;
+        color: #fff; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
+      }
+      #controllerView .ctrl-preview-box {
+        flex: 1;
+        max-height: none;
+        aspect-ratio: auto;
+        border: 1px solid var(--border);
+        box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.15);
+        border-radius: 10px;
+      }
+      #controllerView .now-playing {
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: 0 0 12px rgba(0, 210, 255, 0.05);
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        flex-shrink: 0;
+      }
+      #controllerView .np-info { display: none; }
     }
   </style>
 </head>
@@ -318,86 +567,103 @@
 
     <div id="statusBanner" class="status-banner">Host Stage Ready — Waiting for Queue</div>
 
-    <!-- Video Player Stage -->
-    <div class="stage is-standby" id="playerStage">
-      <!-- Exit Fullscreen Button (Top-Left, Above "On the mic") -->
-      <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
-
-      <!-- Top-Left "On the mic" Card (Below Exit Stage) -->
-      <div class="fs-mic-card" id="fsMicCard">
-        <div class="fs-mic-label">On the mic</div>
-        <div class="fs-mic-singer" id="fsMicSinger">Guest</div>
-      </div>
-
-      <!-- Bottom-Left "Next Song" Card -->
-      <div class="fs-next-card">
-        <div class="fs-next-title">Next song</div>
-        <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
-        <div class="fs-next-singer" id="fsNextSingerName"></div>
-      </div>
-
-      <!-- Top-Right QR Badge with "GUEST QR" label -->
-      <div class="fs-qr-badge">
-        <img class="qrImgTag" alt="Scan QR" />
-        <div class="fs-qr-label">GUEST QR</div>
-      </div>
-
-      <!-- Normal Mode Interlude / Standby Screen -->
-      <div class="qr-overlay-normal" id="normalQrOverlay">
-        <div class="music-symbol">𝄞</div>
-        <div class="music-symbol">♯</div>
-        <div class="music-symbol">♫</div>
-        <div class="music-symbol">♪</div>
-
-        <!-- Animated Equalizer Bars Placed ABOVE Logo -->
-        <div class="standby-anim-icon">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
+    <div class="host-left-pane" style="display:flex; flex-direction:column; flex:1; min-height:0;">
+      <div class="left-sub-panel">
+        <!-- Search Input Bar -->
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+          <button class="btn" onclick="searchYouTube()">Search</button>
         </div>
 
-        <!-- Maximized Pulsing Logo -->
-        <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
+        <!-- Tabs -->
+        <div class="tabs">
+          <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
+          <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
+        </div>
 
-        <div class="standby-title">KARA-WEB UTEP</div>
-        <div class="standby-subtitle">Scan the Guest QR at the top-right to reserve songs</div>
+        <!-- Lists -->
+        <div class="list-container" id="listContainer">
+          <div class="placeholder"><p>Type a song above and tap Search</p></div>
+        </div>
       </div>
 
-      <!-- Active Video Container -->
-      <div id="mediaMount" style="width:100%; height:100%;"></div>
-    </div>
-
-    <!-- Now Playing & Transport Controls -->
-    <div class="now-playing">
-      <div class="np-info">
-        <span class="np-title" id="npTitle">No song playing</span>
-        <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
-      </div>
-      <div class="transport-btns">
-        <button class="btn secondary" onclick="togglePlayPause()" title="Play/Pause">⏯</button>
-        <button class="btn danger" onclick="stopPlayback()" title="Stop">⏹</button>
-        <button class="btn" onclick="playNext()" title="Next">⏭</button>
+      <!-- Reserve Summary Card (Landscape Left Column) -->
+      <div class="reserve-panel">
+        <div class="reserve-header">
+          <span>📁</span>
+          <span>Reserve</span>
+        </div>
+        <div class="reserve-desc" id="hostReserveContent">Reserved Content is Empty</div>
       </div>
     </div>
 
-    <!-- Search Input Bar -->
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
-      <button class="btn" onclick="searchYouTube()">Search</button>
-    </div>
+    <div class="host-right-pane" style="display:flex; flex-direction:column; min-height:0;">
+      <!-- Video Player Stage -->
+      <div class="stage is-standby" id="playerStage">
+        <!-- Exit Fullscreen Button -->
+        <button class="btn glass fs-exit-btn" onclick="toggleCustomFullscreen()">✕ Exit Stage</button>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
-      <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
-    </div>
+        <!-- Top-Left "On the mic" Card -->
+        <div class="fs-mic-card" id="fsMicCard">
+          <div class="fs-mic-label">On the mic</div>
+          <div class="fs-mic-singer" id="fsMicSinger">Guest</div>
+        </div>
 
-    <!-- Lists -->
-    <div class="list-container" id="listContainer">
-      <div class="placeholder"><p>Type a song above and tap Search</p></div>
+        <!-- Bottom-Left "Next Song" Card -->
+        <div class="fs-next-card">
+          <div class="fs-next-title">Next song</div>
+          <div class="fs-next-song" id="fsNextSongName">"No song reserved"</div>
+          <div class="fs-next-singer" id="fsNextSingerName"></div>
+        </div>
+
+        <!-- Top-Right QR Badge with "GUEST QR" label -->
+        <div class="fs-qr-badge">
+          <img class="qrImgTag" alt="Scan QR" />
+          <div class="fs-qr-label">GUEST QR</div>
+        </div>
+
+        <!-- Normal Mode Interlude / Standby Screen Overlay -->
+        <div class="qr-overlay-normal" id="normalQrOverlay">
+          <div class="music-symbol">𝄞</div>
+          <div class="music-symbol">♯</div>
+          <div class="music-symbol">♫</div>
+          <div class="music-symbol">♪</div>
+
+          <!-- Animated Equalizer Bars Placed ABOVE Logo -->
+          <div class="standby-anim-icon">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+
+          <!-- Maximized Pulsing Logo -->
+          <img src="icon.jpg" class="standby-logo" alt="Kara Logo" />
+
+          <div class="standby-title">KARA-WEB UTEP</div>
+          <div class="standby-subtitle">Scan the Guest QR at the top-right to reserve songs</div>
+        </div>
+
+        <!-- Active Video Container -->
+        <div id="mediaMount" style="width:100%; height:100%;"></div>
+      </div>
+
+      <!-- Now Playing & Transport Controls -->
+      <div class="now-playing">
+        <div class="np-info">
+          <span class="np-title" id="npTitle">No song playing</span>
+          <span class="np-next-mini" id="npNextMini">Up Next: Queue is empty</span>
+        </div>
+        <div class="media-transport-cluster">
+          <button class="m-btn" onclick="togglePlayPause()" title="Previous / Reload">⏪</button>
+          <button class="m-btn" onclick="togglePlayPause()" title="Play / Pause">▶</button>
+          <button class="m-btn" onclick="stopPlayback()" title="Stop">⏹</button>
+          <button class="m-btn" onclick="playNext()" title="Next / Forward">⏩</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -408,46 +674,72 @@
       <button class="btn secondary" onclick="exitController()">Exit</button>
     </header>
 
-    <!-- Muted Stage Preview (Controller Mode Only) -->
-    <div class="ctrl-preview-wrap" id="ctrlPreviewWrap">
-      <div class="ctrl-preview-header">
-        <span class="ctrl-muted-badge" id="ctrlPreviewBadge">🔇 MUTED STAGE PREVIEW</span>
-        <span id="ctrlPreviewSinger">On the mic: Guest</span>
+    <!-- Column 1: Left Pane (Search, Tabs, and Reserve panels) -->
+    <div class="ctrl-left-pane">
+      <div class="left-sub-panel">
+        <!-- Search Input Bar with Icon -->
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="ctrlSearchInput" placeholder="Search..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
+          <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
+        </div>
+
+        <!-- Controller List Tabs -->
+        <div class="tabs">
+          <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
+          <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
+        </div>
+
+        <!-- Controller Scrollable Lists -->
+        <div class="list-container" id="ctrlListContainer">
+          <div class="placeholder"><p>Search songs to add to queue</p></div>
+        </div>
       </div>
-      <div class="ctrl-preview-box">
-        <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
-        <div id="ctrlPreviewMount"></div>
+
+      <!-- Bottom Cyberpunk Reserve Card -->
+      <div class="reserve-panel">
+        <div class="reserve-header">
+          <span>📁</span>
+          <span>Reserve</span>
+        </div>
+        <div class="reserve-desc" id="ctrlReserveContent">Reserved Content is Empty</div>
       </div>
     </div>
 
-    <!-- Now Playing & Transport Controls for Guests -->
-    <div class="now-playing">
-      <div class="np-info">
-        <span class="np-title" id="ctrlNpTitle">No song playing</span>
-        <span class="np-next-mini" id="ctrlNpNextMini">Up Next: Queue is empty</span>
+    <!-- Column 2: Right Pane (Stage Preview and Media Control Dock) -->
+    <div class="ctrl-right-pane">
+      <div class="ctrl-preview-wrap" id="ctrlPreviewWrap">
+        <div class="ctrl-preview-header">
+          <span class="ctrl-muted-badge" id="ctrlPreviewBadge">
+            <span style="font-size:0.95rem;">📺</span>
+            <span>LIVE STAGE MIRROR (MUTED)</span>
+          </span>
+          <span onclick="exitController()">Exit</span>
+        </div>
+        <div class="ctrl-preview-box">
+          <div class="cyber-mirror-overlay" id="ctrlPreviewStandbyOverlay">
+            <div class="cyber-muted-prompt-icon">🔇</div>
+            <div class="cyber-mirror-text">LIVE PREVIEW (MUTED)</div>
+            <div class="cyber-mirror-aspect">16:9</div>
+          </div>
+          <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
+          <div id="ctrlPreviewMount"></div>
+        </div>
       </div>
-      <div class="transport-btns">
-        <button class="btn secondary" onclick="sendControl('playpause')" title="Play/Pause">⏯</button>
-        <button class="btn danger" onclick="sendControl('stop')" title="Stop">⏹</button>
-        <button class="btn" onclick="sendControl('next')" title="Next">⏭</button>
+
+      <!-- Player Transport Dock -->
+      <div class="now-playing">
+        <div class="np-info">
+          <span class="np-title" id="ctrlNpTitle">No song playing</span>
+          <span class="np-next-mini" id="ctrlNpNextMini">Up Next: Queue is empty</span>
+        </div>
+        <div class="media-transport-cluster">
+          <button class="m-btn" onclick="sendControl('playpause')" title="Previous / Reload">⏪</button>
+          <button class="m-btn" onclick="sendControl('playpause')" title="Play / Pause">▶</button>
+          <button class="m-btn" onclick="sendControl('stop')" title="Stop">⏹</button>
+          <button class="m-btn" onclick="sendControl('next')" title="Next / Forward">⏩</button>
+        </div>
       </div>
-    </div>
-
-    <!-- Search Input Bar -->
-    <div class="search-bar">
-      <input type="text" id="ctrlSearchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
-      <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
-    </div>
-
-    <!-- Controller Tabs -->
-    <div class="tabs">
-      <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
-      <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
-    </div>
-
-    <!-- Controller Lists -->
-    <div class="list-container" id="ctrlListContainer">
-      <div class="placeholder"><p>Search songs to add to queue</p></div>
     </div>
   </div>
 
@@ -530,7 +822,6 @@
           if (!isControllerMode) {
             renderStoppedUI();
           } else {
-            document.getElementById('ctrlPreviewSinger').innerText = 'On the mic: Guest';
             if (!isLiveMirrorConnected) {
               stopCtrlPreview();
             }
@@ -545,8 +836,6 @@
             startStream(song);
           }
         } else {
-          const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
-          document.getElementById('ctrlPreviewSinger').innerText = `On the mic: ${singerName}`;
           if (ctrlPreviewInstanceKey !== instanceKey) {
             ctrlPreviewInstanceKey = instanceKey;
             startMutedCtrlPreview(song);
@@ -611,6 +900,7 @@
 
     async function toggleStageMirrorBroadcast() {
       const btn = document.getElementById('btnShareStage');
+      const banner = document.getElementById('statusBanner');
       if (hostCaptureStream) {
         hostCaptureStream.getTracks().forEach(t => t.stop());
         hostCaptureStream = null;
@@ -620,6 +910,7 @@
         btn.innerText = '📡 Mirror';
         btn.classList.remove('danger');
         btn.classList.add('secondary');
+        banner.innerText = 'Host Stage Ready — Mirror Stopped';
         return;
       }
 
@@ -632,6 +923,7 @@
         btn.innerText = '🔴 Live';
         btn.classList.remove('secondary');
         btn.classList.add('danger');
+        banner.innerText = 'Host Stage Mirror Live — Broadcasting to Guests';
 
         hostCaptureStream.getVideoTracks()[0].onended = () => {
           if (hostCaptureStream) toggleStageMirrorBroadcast();
@@ -734,8 +1026,9 @@
         };
         videoEl.play().catch(() => {});
         document.getElementById('ctrlPreviewMount').style.display = 'none';
+        document.getElementById('ctrlPreviewStandbyOverlay').style.display = 'none';
         document.getElementById('ctrlPreviewWrap').classList.add('active');
-        document.getElementById('ctrlPreviewBadge').innerText = '🔴 LIVE STAGE MIRROR (MUTED)';
+        document.getElementById('ctrlPreviewBadge').innerHTML = '<span style="font-size:0.95rem;">🔴</span><span>LIVE STAGE MIRROR (MUTED)</span>';
         isLiveMirrorConnected = true;
       };
 
@@ -784,8 +1077,9 @@
       }
       const mount = document.getElementById('ctrlPreviewMount');
       if (mount) mount.style.display = 'block';
+      document.getElementById('ctrlPreviewStandbyOverlay').style.display = 'flex';
       const badge = document.getElementById('ctrlPreviewBadge');
-      if (badge) badge.innerText = '🔇 MUTED STAGE PREVIEW';
+      if (badge) badge.innerHTML = '<span style="font-size:0.95rem;">📺</span><span>LIVE STAGE MIRROR (MUTED)</span>';
 
       if (wasConnected) {
         if (currentSongCache && currentSongCache.id) {
@@ -840,17 +1134,21 @@
       let mainTitle = '"No song reserved"';
       let mainSinger = '';
       let miniText = 'Up Next: Queue is empty';
+      let reserveSummary = 'Reserved Content is Empty';
 
       if (queue.length > 0) {
         const nextSong = queue[0];
         mainTitle = `"${nextSong.title}"`;
         mainSinger = `Queue by: ${nextSong.singer || 'Guest'}`;
         miniText = `Up Next: ${nextSong.title} (Queue by: ${nextSong.singer || 'Guest'})`;
+        reserveSummary = `Up Next: ${nextSong.title} (${nextSong.singer || 'Guest'})`;
       }
 
       document.getElementById('fsNextSongName').innerText = mainTitle;
       document.getElementById('fsNextSingerName').innerText = mainSinger;
       document.getElementById('npNextMini').innerText = miniText;
+      document.getElementById('hostReserveContent').innerText = reserveSummary;
+      document.getElementById('ctrlReserveContent').innerText = reserveSummary;
 
       db.ref('state/upNext').set(miniText);
     }
@@ -1003,10 +1301,12 @@
           const div = document.createElement('div');
           div.className = 'song-item';
           div.innerHTML = `
-            ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
-            <div class="song-meta">
-              <div class="song-title">#${idx + 1} • ${song.title}</div>
-              <div class="song-artist">Queue by: ${song.singer || 'Guest'} • ${song.channel}</div>
+            <div class="song-meta" style="display:flex; align-items:center; gap:8px;">
+              <span style="color:var(--accent); font-size:1.2rem;">🎵</span>
+              <div>
+                <div class="song-title">#${idx + 1} • ${song.title}</div>
+                <div class="song-artist">${song.singer || 'Guest'} • ${song.channel}</div>
+              </div>
             </div>
           `;
           container.appendChild(div);
@@ -1023,10 +1323,12 @@
         const div = document.createElement('div');
         div.className = 'song-item';
         div.innerHTML = `
-          ${song.thumbnail ? `<img class="song-thumb" src="${song.thumbnail}" />` : ''}
-          <div class="song-meta">
-            <div class="song-title">${song.title}</div>
-            <div class="song-artist">${song.channel}</div>
+          <div class="song-meta" style="display:flex; align-items:center; gap:8px;">
+            <span style="color:var(--accent); font-size:1.2rem;">🎵</span>
+            <div>
+              <div class="song-title">${song.title}</div>
+              <div class="song-artist">${song.channel}</div>
+            </div>
           </div>
           <div class="song-actions">
             <button class="btn" onclick="promptAndQueue('${song.id}', true)">Queue</button>
@@ -1125,6 +1427,7 @@
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
       document.getElementById('playerStage').classList.add('is-standby');
+      document.getElementById('statusBanner').innerText = 'Host Stage Ready — Standby Mode';
     }
 
     function startStream(song) {
@@ -1132,6 +1435,7 @@
       const displayTitle = `${song.title} (Queue by: ${singerName})`;
       document.getElementById('npTitle').innerText = displayTitle;
       document.getElementById('fsMicSinger').innerText = singerName;
+      document.getElementById('statusBanner').innerText = `Now Playing: ${displayTitle}`;
       db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
       document.getElementById('playerStage').classList.remove('is-standby');
@@ -1203,8 +1507,6 @@
         return;
       }
 
-      const singerName = (song.singer && song.singer.trim()) ? song.singer.trim() : 'Guest';
-      document.getElementById('ctrlPreviewSinger').innerText = `On the mic: ${singerName}`;
       document.getElementById('ctrlPreviewWrap').classList.add('active');
 
       const elapsedSec = song.startedAt
@@ -1235,6 +1537,7 @@
             onReady: (event) => {
               event.target.mute();
               event.target.setVolume(0);
+              document.getElementById('ctrlPreviewStandbyOverlay').style.display = 'none';
               if (ctrlDesiredPlaying) {
                 event.target.playVideo();
               } else {
