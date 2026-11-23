@@ -659,7 +659,6 @@
 
           hostCaptureStream.getTracks().forEach(track => pc.addTrack(track, hostCaptureStream));
 
-          // Force H.264 codec priority so iOS Safari decodes Chrome screen-share streams
           if (typeof RTCRtpSender !== 'undefined' && RTCRtpSender.getCapabilities) {
             const videoCaps = RTCRtpSender.getCapabilities('video');
             if (videoCaps && videoCaps.codecs) {
@@ -716,6 +715,12 @@
       const pc = new RTCPeerConnection(rtcConfig);
       guestPeer = pc;
 
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+          teardownGuestLiveMirror();
+        }
+      };
+
       pc.ontrack = (event) => {
         stopCtrlPreview();
         const videoEl = document.getElementById('ctrlLiveMirrorVideo');
@@ -724,6 +729,9 @@
         videoEl.muted = true;
         videoEl.srcObject = event.streams[0];
         videoEl.style.display = 'block';
+        videoEl.onloadedmetadata = () => {
+          videoEl.play().catch(() => {});
+        };
         videoEl.play().catch(() => {});
         document.getElementById('ctrlPreviewMount').style.display = 'none';
         document.getElementById('ctrlPreviewWrap').classList.add('active');
@@ -770,6 +778,7 @@
       }
       const videoEl = document.getElementById('ctrlLiveMirrorVideo');
       if (videoEl) {
+        videoEl.onloadedmetadata = null;
         videoEl.srcObject = null;
         videoEl.style.display = 'none';
       }
