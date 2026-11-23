@@ -47,7 +47,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 8px 12px;
+      padding: 7px 12px;
       background: #030816;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
@@ -55,7 +55,7 @@
 
     .brand {
       font-weight: 800;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       letter-spacing: 0.04em;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
       -webkit-background-clip: text;
@@ -70,19 +70,6 @@
       justify-content: flex-end;
     }
 
-    .status-banner {
-      background: #060e22;
-      border-bottom: 1px solid var(--border);
-      color: var(--accent);
-      font-size: 0.72rem;
-      padding: 4px 12px;
-      text-align: center;
-      flex-shrink: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
     .btn {
       background: linear-gradient(135deg, var(--accent), #0284c7);
       color: #fff;
@@ -90,7 +77,7 @@
       padding: 6px 10px;
       border-radius: 9px;
       font-weight: 600;
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s ease;
@@ -101,33 +88,32 @@
     .btn.danger { background: #dc2626; color: #fff; }
     .btn.glass { background: rgba(8, 17, 41, 0.88); border: 1px solid rgba(0, 210, 255, 0.35); color: #fff; }
 
-    /* Shared Song Info Cards (Current Song + Next Song Queue By) */
+    /* Compact Song Info Cards (Current Song + Next Song Queue By) */
     .song-cards-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #040916;
-      border-bottom: 1px solid var(--border);
+      gap: 6px;
+      padding: 6px 10px 0;
       flex-shrink: 0;
     }
 
     .song-info-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 7px 10px;
+      border-radius: 8px;
+      padding: 5px 8px;
       min-width: 0;
       overflow: hidden;
     }
 
     .song-card-label {
-      font-size: 0.62rem;
+      font-size: 0.56rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--accent);
-      margin-bottom: 2px;
+      line-height: 1.1;
+      margin-bottom: 1px;
     }
 
     .song-card-label.next {
@@ -135,46 +121,46 @@
     }
 
     .song-card-title {
-      font-size: 0.82rem;
+      font-size: 0.74rem;
       font-weight: 700;
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.2;
     }
 
     .song-card-sub {
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       color: var(--muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.2;
       margin-top: 1px;
     }
 
-    /* Transport Controls: Play, Pause, Stop, Next */
+    /* Compact Transport Controls: Play, Pause, Stop, Next */
     .transport-dock {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #050b1c;
-      border-bottom: 1px solid var(--border);
+      gap: 6px;
+      padding: 6px 10px;
       flex-shrink: 0;
     }
 
     .t-btn {
       flex: 1;
-      max-width: 110px;
+      max-width: 112px;
       background: #0c1b40;
       border: 1.5px solid var(--border);
       color: var(--accent);
-      font-size: 0.95rem;
+      font-size: 0.84rem;
       font-weight: 700;
-      padding: 8px 0;
-      border-radius: 10px;
-      box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.06);
+      padding: 6px 0;
+      border-radius: 9px;
+      box-shadow: inset 0 0 8px rgba(0, 210, 255, 0.06);
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
@@ -195,9 +181,9 @@
       flex-direction: column;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 10px;
-      margin: 8px 12px 0;
+      border-radius: 11px;
+      padding: 6px 8px;
+      margin: 0 10px;
       flex-shrink: 0;
       min-height: 0;
     }
@@ -207,22 +193,22 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-bottom: 6px;
-      font-size: 0.7rem;
+      margin-bottom: 5px;
+      font-size: 0.66rem;
       flex-shrink: 0;
     }
 
     .preview-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: rgba(0, 210, 255, 0.12);
       color: var(--accent);
       border: 1px solid var(--border);
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 0.66rem;
+      font-size: 0.62rem;
       letter-spacing: 0.04em;
     }
 
@@ -234,7 +220,7 @@
 
     .preview-mic-tag {
       color: #cbd5e1;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -244,13 +230,13 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 24dvh;
+      max-height: 23dvh;
       background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 9px;
       overflow: hidden;
       box-shadow: inset 0 0 18px rgba(0, 210, 255, 0.12);
     }
@@ -439,7 +425,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 10px;
+      padding: 8px;
       z-index: 15;
       overflow: hidden;
     }
@@ -449,7 +435,7 @@
     .music-symbol {
       position: absolute;
       color: rgba(0, 210, 255, 0.22);
-      font-size: clamp(1.4rem, 3.2vw, 4.5rem);
+      font-size: clamp(1.3rem, 3vw, 4.5rem);
       user-select: none;
       pointer-events: none;
       animation: floatSymbol 4s ease-in-out infinite;
@@ -461,7 +447,7 @@
 
     @keyframes floatSymbol {
       0% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
-      50% { transform: translateY(-12px) rotate(10deg); opacity: 0.5; }
+      50% { transform: translateY(-10px) rotate(10deg); opacity: 0.5; }
       100% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
     }
 
@@ -469,13 +455,13 @@
       display: flex;
       gap: clamp(3px, 0.45vw, 8px);
       align-items: flex-end;
-      height: clamp(20px, 3.6vh, 54px);
-      margin-bottom: clamp(6px, 1vh, 14px);
+      height: clamp(18px, 3.4vh, 52px);
+      margin-bottom: clamp(4px, 0.8vh, 12px);
       z-index: 2;
     }
 
     .bar {
-      width: clamp(4px, 0.6vw, 10px);
+      width: clamp(4px, 0.55vw, 10px);
       background: var(--accent);
       border-radius: 4px;
       animation: pulseBar 1.2s ease-in-out infinite alternate;
@@ -493,9 +479,9 @@
     }
 
     .standby-logo {
-      width: clamp(54px, 9vw, 180px);
-      height: clamp(54px, 9vw, 180px);
-      border-radius: clamp(12px, 1.8vw, 26px);
+      width: clamp(48px, 8.5vw, 180px);
+      height: clamp(48px, 8.5vw, 180px);
+      border-radius: clamp(10px, 1.6vw, 26px);
       object-fit: cover;
       border: 2px solid var(--accent);
       z-index: 2;
@@ -510,29 +496,29 @@
 
     .standby-title {
       font-weight: 800;
-      font-size: clamp(0.85rem, 1.8vw, 2.2rem);
+      font-size: clamp(0.8rem, 1.7vw, 2.2rem);
       color: #fff;
-      margin-top: clamp(6px, 1vh, 14px);
-      letter-spacing: 1.2px;
+      margin-top: clamp(4px, 0.8vh, 12px);
+      letter-spacing: 1px;
       z-index: 2;
     }
 
     .standby-subtitle {
-      font-size: clamp(0.66rem, 1vw, 1.15rem);
+      font-size: clamp(0.62rem, 0.95vw, 1.1rem);
       color: var(--accent);
-      margin-top: 3px;
+      margin-top: 2px;
       z-index: 2;
     }
 
     .host-lost-banner {
       display: none;
-      margin-top: 6px;
-      padding: 3px 10px;
+      margin-top: 5px;
+      padding: 2px 9px;
       border-radius: 999px;
       background: rgba(220, 38, 38, 0.22);
       border: 1px solid rgba(248, 113, 113, 0.7);
       color: #fecaca;
-      font-size: 0.68rem;
+      font-size: 0.64rem;
       font-weight: 700;
       z-index: 3;
     }
@@ -547,24 +533,24 @@
       flex-direction: column;
       flex: 1;
       min-height: 0;
-      margin: 8px 12px 10px;
+      margin: 6px 10px 8px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 11px;
       overflow: hidden;
     }
 
     .search-bar {
       display: flex;
-      gap: 8px;
-      padding: 8px 10px;
+      gap: 6px;
+      padding: 6px 8px;
       background: #040916;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       align-items: center;
     }
 
-    .search-icon { color: var(--accent); font-size: 1rem; flex-shrink: 0; }
+    .search-icon { color: var(--accent); font-size: 0.95rem; flex-shrink: 0; }
 
     .search-bar input {
       flex: 1;
@@ -572,9 +558,9 @@
       background: #071129;
       border: 1px solid var(--border);
       color: #fff;
-      padding: 7px 10px;
-      border-radius: 9px;
-      font-size: 0.88rem;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 0.84rem;
       outline: none;
     }
 
@@ -593,9 +579,9 @@
     .tab {
       flex: 1;
       text-align: center;
-      padding: 8px;
+      padding: 7px 6px;
       font-weight: 600;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       color: var(--muted);
       cursor: pointer;
       border-bottom: 2px solid transparent;
@@ -612,7 +598,7 @@
       flex: 1;
       min-height: 0;
       overflow: auto;
-      padding: 8px 10px 14px;
+      padding: 6px 8px 12px;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -620,10 +606,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       background: #0b1736;
-      padding: 8px 10px;
-      border-radius: 10px;
+      padding: 7px 9px;
+      border-radius: 9px;
       margin-bottom: 6px;
       border: 1px solid var(--border);
       width: max-content;
@@ -631,8 +617,8 @@
     }
 
     .song-thumb {
-      width: 52px;
-      height: 38px;
+      width: 48px;
+      height: 36px;
       border-radius: 6px;
       object-fit: cover;
       flex-shrink: 0;
@@ -641,18 +627,18 @@
 
     .song-meta {
       flex: 1;
-      min-width: 180px;
+      min-width: 160px;
     }
 
     .song-title {
       font-weight: 600;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       white-space: nowrap;
       margin-bottom: 2px;
     }
 
     .song-artist {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--muted);
       white-space: nowrap;
     }
@@ -666,11 +652,11 @@
     .placeholder {
       text-align: center;
       color: var(--muted);
-      padding: 16px;
-      font-size: 0.84rem;
+      padding: 14px;
+      font-size: 0.8rem;
     }
 
-    /* Unified Portrait Flow (Both Host and Guest Controller) */
+    /* Portrait Flow: Top = Song Info -> Transport -> Live/Mirror Stage; Bottom = Search + Tabs + List */
     .unified-shell {
       display: flex;
       flex-direction: column;
@@ -678,16 +664,23 @@
       overflow: hidden;
     }
 
+    .unified-shell .right-stage-col {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      min-height: 0;
+    }
+
     #controllerView {
       display: none;
     }
 
-    /* Unified Landscape Two-Column Layout (Host & Guest Controller Identical) */
+    /* Unified Landscape Layout (Both Host & Guest Controller Identical) */
     @media (orientation: landscape) and (min-width: 640px) {
       .unified-shell[data-active-view="true"] {
         display: grid !important;
-        grid-template-columns: minmax(290px, 36%) 1fr;
-        grid-template-rows: auto auto 1fr;
+        grid-template-columns: minmax(235px, 28%) 1fr;
+        grid-template-rows: auto 1fr;
         height: 100dvh;
         overflow: hidden;
       }
@@ -695,38 +688,62 @@
       .unified-shell > header {
         grid-column: 1 / -1;
         grid-row: 1;
+        padding: 5px 12px;
       }
 
-      .unified-shell > .status-banner {
-        grid-column: 1 / -1;
-        grid-row: 2;
-      }
-
-      /* Left Column: Search + Tabs + Full-Height Scrollable Song List (Reserve card removed) */
+      /* Minimized Left Column: Search + Tabs + Scrollable List extending to bottom */
       .unified-shell .catalog-pane {
         grid-column: 1;
-        grid-row: 3;
-        margin: 8px 6px 10px 10px;
+        grid-row: 2;
+        margin: 6px 5px 8px 8px;
         min-height: 0;
         height: auto;
       }
 
-      /* Right Column: Enlarged Stage/Mirror + Current & Next Song Cards + Transport Buttons */
+      /* Maximized Right Column: Compact Info + Compact Transport + Large Stage/Mirror */
       .unified-shell .right-stage-col {
         grid-column: 2;
-        grid-row: 3;
+        grid-row: 2;
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        margin: 8px 10px 10px 6px;
+        gap: 5px;
+        margin: 6px 8px 8px 5px;
         min-height: 0;
         overflow: hidden;
       }
 
+      .unified-shell .song-cards-row {
+        padding: 0;
+        gap: 6px;
+      }
+
+      .unified-shell .song-info-card {
+        padding: 4px 8px;
+      }
+
+      .unified-shell .song-card-title {
+        font-size: 0.72rem;
+      }
+
+      .unified-shell .transport-dock {
+        padding: 0;
+        gap: 6px;
+      }
+
+      .unified-shell .t-btn {
+        padding: 4px 0;
+        font-size: 0.78rem;
+      }
+
       .unified-shell .stage-panel {
         margin: 0;
+        padding: 5px 7px;
         flex: 1;
         min-height: 0;
+      }
+
+      .unified-shell .preview-top-bar {
+        margin-bottom: 4px;
       }
 
       .unified-shell .stage {
@@ -734,19 +751,6 @@
         min-height: 0;
         max-height: none;
         aspect-ratio: auto;
-      }
-
-      .unified-shell .song-cards-row {
-        padding: 0;
-        background: transparent;
-        border-bottom: none;
-      }
-
-      .unified-shell .transport-dock {
-        padding: 6px 10px;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
       }
     }
   </style>
@@ -766,33 +770,13 @@
       </div>
     </header>
 
-    <div id="statusBanner" class="status-banner">Host Stage Ready — Standby Mode</div>
-
-    <!-- Left Column (Landscape) / Lower Section (Portrait): Search, Tabs & Scrollable List -->
-    <div class="catalog-pane">
-      <div class="search-bar">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
-        <button class="btn" onclick="searchYouTube()">Search</button>
-      </div>
-
-      <div class="tabs">
-        <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
-        <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
-      </div>
-
-      <div class="list-container" id="listContainer">
-        <div class="placeholder"><p>Type a song above and tap Search</p></div>
-      </div>
-    </div>
-
-    <!-- Right Column (Landscape) / Upper Section (Portrait): Current & Next Cards + Transport + Live Stage -->
-    <div class="right-stage-col" style="display:flex; flex-direction:column; min-height:0;">
-      <!-- Current Song & Next Song Cards -->
+    <!-- Upper Block (Portrait) / Right Column (Landscape): Song Info + Transport + Live Stage -->
+    <div class="right-stage-col">
+      <!-- Minimized Current Song & Next Song Cards -->
       <div class="song-cards-row">
         <div class="song-info-card">
           <div class="song-card-label">Current Song</div>
-          <div class="song-card-title" id="npTitle">No song playing</div>
+          <div class="song-card-title" id="npTitle">Standby — No song playing</div>
           <div class="song-card-sub" id="hostCurrentSinger">On the mic: Guest</div>
         </div>
         <div class="song-info-card">
@@ -863,6 +847,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Lower Block (Portrait) / Left Column (Landscape): Search, Tabs & 2D Scrollable List -->
+    <div class="catalog-pane">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') searchYouTube()" />
+        <button class="btn" onclick="searchYouTube()">Search</button>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="tabSearch" onclick="switchTab('search')">Results / Files (<span id="resultCount">0</span>)</div>
+        <div class="tab" id="tabQueue" onclick="switchTab('queue')">Reserved (<span id="queueCount">0</span>)</div>
+      </div>
+
+      <div class="list-container" id="listContainer">
+        <div class="placeholder"><p>Type a song above and tap Search</p></div>
+      </div>
+    </div>
   </div>
 
   <!-- REMOTE CONTROLLER VIEW -->
@@ -874,33 +876,13 @@
       </div>
     </header>
 
-    <div id="ctrlStatusBanner" class="status-banner">Waiting for Host Mirror...</div>
-
-    <!-- Left Column (Landscape) / Lower Section (Portrait): Search, Tabs & Scrollable List -->
-    <div class="catalog-pane">
-      <div class="search-bar">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="ctrlSearchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
-        <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
-      </div>
-
-      <div class="tabs">
-        <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
-        <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
-      </div>
-
-      <div class="list-container" id="ctrlListContainer">
-        <div class="placeholder"><p>Search songs to add to queue</p></div>
-      </div>
-    </div>
-
-    <!-- Right Column (Landscape) / Upper Section (Portrait): Current & Next Cards + Transport + Live Mirror -->
-    <div class="right-stage-col" style="display:flex; flex-direction:column; min-height:0;">
-      <!-- Current Song & Next Song Cards -->
+    <!-- Upper Block (Portrait) / Right Column (Landscape): Song Info + Transport + Live Mirror -->
+    <div class="right-stage-col">
+      <!-- Minimized Current Song & Next Song Cards -->
       <div class="song-cards-row">
         <div class="song-info-card">
           <div class="song-card-label">Current Song</div>
-          <div class="song-card-title" id="ctrlNpTitle">No song playing</div>
+          <div class="song-card-title" id="ctrlNpTitle">Standby — No song playing</div>
           <div class="song-card-sub" id="ctrlCurrentSinger">On the mic: Guest</div>
         </div>
         <div class="song-info-card">
@@ -951,6 +933,24 @@
           <video id="ctrlLiveMirrorVideo" autoplay muted playsinline style="display:none;"></video>
           <div id="ctrlPreviewMount" style="display:none; width:100%; height:100%;"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Lower Block (Portrait) / Left Column (Landscape): Search, Tabs & 2D Scrollable List -->
+    <div class="catalog-pane">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="ctrlSearchInput" placeholder="Search YouTube karaoke song..." onkeypress="if(event.key==='Enter') ctrlSearchYouTube()" />
+        <button class="btn" onclick="ctrlSearchYouTube()">Search</button>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="ctrlTabSearch" onclick="switchCtrlTab('search')">Results / Files (<span id="ctrlResultCount">0</span>)</div>
+        <div class="tab" id="ctrlTabQueue" onclick="switchCtrlTab('queue')">Reserved (<span id="ctrlQueueCount">0</span>)</div>
+      </div>
+
+      <div class="list-container" id="ctrlListContainer">
+        <div class="placeholder"><p>Search songs to add to queue</p></div>
       </div>
     </div>
   </div>
@@ -1082,7 +1082,7 @@
       });
 
       db.ref('state/nowPlaying').on('value', (snapshot) => {
-        const title = snapshot.val() || 'No song playing';
+        const title = snapshot.val() || 'Standby — No song playing';
         document.getElementById('ctrlNpTitle').innerText = title;
       });
 
@@ -1132,13 +1132,11 @@
     function setHostLostState(isLost) {
       const lostBanner = document.getElementById('hostLostIndicator');
       const subtitle = document.getElementById('ctrlStandbySubtitle');
-      const ctrlBanner = document.getElementById('ctrlStatusBanner');
       const badge = document.getElementById('ctrlPreviewBadge');
 
       if (isLost) {
         lostBanner.classList.add('visible');
         subtitle.innerText = 'Host signal lost — Reconnecting...';
-        ctrlBanner.innerText = '⚠ Host Lost — Waiting for Host Connection';
         if (!isLiveMirrorConnected) {
           badge.classList.add('lost');
           badge.innerText = '⚠ HOST LOST';
@@ -1149,9 +1147,6 @@
           subtitle.innerText = hostMirrorEnabled
             ? 'Mirror enabled — Connecting live video...'
             : 'Standby — Waiting for Host Mirror';
-          ctrlBanner.innerText = hostMirrorEnabled
-            ? 'Host Mirror Active — Connecting...'
-            : 'Standby — Host Mirror Not Enabled';
           badge.classList.remove('lost');
           badge.innerText = hostMirrorEnabled ? '📡 MIRROR STARTING' : '⏳ STANDBY (MIRROR OFF)';
         }
@@ -1170,7 +1165,6 @@
 
     async function toggleStageMirrorBroadcast() {
       const btn = document.getElementById('btnShareStage');
-      const banner = document.getElementById('statusBanner');
       if (hostCaptureStream) {
         hostCaptureStream.getTracks().forEach(t => t.stop());
         hostCaptureStream = null;
@@ -1180,7 +1174,6 @@
         btn.innerText = '📡 Mirror';
         btn.classList.remove('danger');
         btn.classList.add('secondary');
-        banner.innerText = 'Host Stage Ready — Mirror Off';
         return;
       }
 
@@ -1193,7 +1186,6 @@
         btn.innerText = '🔴 Live';
         btn.classList.remove('secondary');
         btn.classList.add('danger');
-        banner.innerText = 'Host Stage Mirror Live — Broadcasting to Guests';
 
         hostCaptureStream.getVideoTracks()[0].onended = () => {
           if (hostCaptureStream) toggleStageMirrorBroadcast();
@@ -1301,7 +1293,6 @@
         document.getElementById('hostLostIndicator').classList.remove('visible');
         document.getElementById('ctrlPreviewBadge').classList.remove('lost');
         document.getElementById('ctrlPreviewBadge').innerText = '🔴 LIVE STAGE MIRROR (MUTED)';
-        document.getElementById('ctrlStatusBanner').innerText = '🔴 Live Stage Mirror Active (Muted)';
         isLiveMirrorConnected = true;
       };
 
@@ -1351,9 +1342,6 @@
       document.getElementById('ctrlPreviewBadge').innerText = hostMirrorEnabled
         ? '📡 MIRROR STARTING'
         : '⏳ STANDBY (MIRROR OFF)';
-      document.getElementById('ctrlStatusBanner').innerText = hostMirrorEnabled
-        ? 'Host Mirror Enabled — Connecting...'
-        : 'Standby — Host Mirror Not Enabled';
     }
 
     function openController() {
@@ -1688,20 +1676,19 @@
       db.ref('state').update({
         currentSong: null,
         isPlaying: false,
-        nowPlaying: 'No song playing'
+        nowPlaying: 'Standby — No song playing'
       });
     }
 
     function renderStoppedUI() {
       activeMediaType = null;
       ytPlayer = null;
-      document.getElementById('npTitle').innerText = 'No song playing';
+      document.getElementById('npTitle').innerText = 'Standby — No song playing';
       document.getElementById('hostCurrentSinger').innerText = 'On the mic: Guest';
       document.getElementById('fsMicSinger').innerText = 'Guest';
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
       document.getElementById('playerStage').classList.add('is-standby');
-      document.getElementById('statusBanner').innerText = 'Host Stage Ready — Standby Mode';
     }
 
     function startStream(song) {
@@ -1710,7 +1697,6 @@
       document.getElementById('npTitle').innerText = song.title;
       document.getElementById('hostCurrentSinger').innerText = `On the mic: ${singerName}`;
       document.getElementById('fsMicSinger').innerText = singerName;
-      document.getElementById('statusBanner').innerText = `Now Playing: ${displayTitle}`;
       db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
       document.getElementById('playerStage').classList.remove('is-standby');
