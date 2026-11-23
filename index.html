@@ -88,13 +88,20 @@
     .btn.danger { background: #dc2626; color: #fff; }
     .btn.glass { background: rgba(8, 17, 41, 0.88); border: 1px solid rgba(0, 210, 255, 0.35); color: #fff; }
 
-    /* Compact Song Info Cards (Current Song + Next Song Queue By) */
+    /* Song Info Block (Current Song + Next Song; sub-row below in landscape) */
+    .song-info-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 6px 10px 0;
+      flex-shrink: 0;
+    }
+
     .song-cards-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
-      padding: 6px 10px 0;
-      flex-shrink: 0;
+      min-width: 0;
     }
 
     .song-info-card {
@@ -138,6 +145,10 @@
       text-overflow: ellipsis;
       line-height: 1.2;
       margin-top: 1px;
+    }
+
+    .singer-queue-subrow {
+      display: none;
     }
 
     /* Compact Transport Controls: Play, Pause, Stop, Next */
@@ -656,7 +667,7 @@
       font-size: 0.8rem;
     }
 
-    /* Portrait Flow: Top = Song Info -> Transport -> Live/Mirror Stage; Bottom = Search + Tabs + List */
+    /* Portrait Flow */
     .unified-shell {
       display: flex;
       flex-direction: column;
@@ -679,7 +690,7 @@
     @media (orientation: landscape) and (min-width: 640px) {
       .unified-shell[data-active-view="true"] {
         display: grid !important;
-        grid-template-columns: minmax(235px, 28%) 1fr;
+        grid-template-columns: minmax(230px, 27%) 1fr;
         grid-template-rows: auto 1fr;
         height: 100dvh;
         overflow: hidden;
@@ -688,41 +699,75 @@
       .unified-shell > header {
         grid-column: 1 / -1;
         grid-row: 1;
-        padding: 5px 12px;
+        padding: 4px 12px;
       }
 
-      /* Minimized Left Column: Search + Tabs + Scrollable List extending to bottom */
       .unified-shell .catalog-pane {
         grid-column: 1;
         grid-row: 2;
-        margin: 6px 5px 8px 8px;
+        margin: 5px 5px 7px 8px;
         min-height: 0;
         height: auto;
       }
 
-      /* Maximized Right Column: Compact Info + Compact Transport + Large Stage/Mirror */
       .unified-shell .right-stage-col {
         grid-column: 2;
         grid-row: 2;
         display: flex;
         flex-direction: column;
-        gap: 5px;
-        margin: 6px 8px 8px 5px;
+        gap: 4px;
+        margin: 5px 8px 7px 5px;
         min-height: 0;
         overflow: hidden;
       }
 
-      .unified-shell .song-cards-row {
+      /* Minimized Current + Next Song Row with On the mic & Queue by below */
+      .unified-shell .song-info-block {
         padding: 0;
+        gap: 3px;
+      }
+
+      .unified-shell .song-cards-row {
         gap: 6px;
       }
 
       .unified-shell .song-info-card {
-        padding: 4px 8px;
+        padding: 3px 8px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .unified-shell .song-card-label {
+        margin-bottom: 0;
+        flex-shrink: 0;
+        font-size: 0.54rem;
       }
 
       .unified-shell .song-card-title {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
+        line-height: 1.15;
+      }
+
+      .unified-shell .song-info-card .song-card-sub {
+        display: none;
+      }
+
+      .unified-shell .singer-queue-subrow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 0 4px;
+        font-size: 0.62rem;
+        color: var(--muted);
+        line-height: 1.15;
+      }
+
+      .unified-shell .singer-queue-subrow span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .unified-shell .transport-dock {
@@ -731,19 +776,21 @@
       }
 
       .unified-shell .t-btn {
-        padding: 4px 0;
-        font-size: 0.78rem;
+        padding: 3px 0;
+        font-size: 0.74rem;
+        border-radius: 8px;
       }
 
+      /* Maximized Live Stage / Live Mirror */
       .unified-shell .stage-panel {
         margin: 0;
-        padding: 5px 7px;
+        padding: 4px 6px;
         flex: 1;
         min-height: 0;
       }
 
       .unified-shell .preview-top-bar {
-        margin-bottom: 4px;
+        margin-bottom: 3px;
       }
 
       .unified-shell .stage {
@@ -772,17 +819,22 @@
 
     <!-- Upper Block (Portrait) / Right Column (Landscape): Song Info + Transport + Live Stage -->
     <div class="right-stage-col">
-      <!-- Minimized Current Song & Next Song Cards -->
-      <div class="song-cards-row">
-        <div class="song-info-card">
-          <div class="song-card-label">Current Song</div>
-          <div class="song-card-title" id="npTitle">Standby — No song playing</div>
-          <div class="song-card-sub" id="hostCurrentSinger">On the mic: Guest</div>
+      <div class="song-info-block">
+        <div class="song-cards-row">
+          <div class="song-info-card">
+            <div class="song-card-label">Current Song</div>
+            <div class="song-card-title" id="npTitle">Standby — No song playing</div>
+            <div class="song-card-sub" id="hostCurrentSinger">On the mic: Guest</div>
+          </div>
+          <div class="song-info-card">
+            <div class="song-card-label next">Next Song</div>
+            <div class="song-card-title" id="hostNextTitle">No song reserved</div>
+            <div class="song-card-sub" id="hostNextQueueBy">Queue by: -</div>
+          </div>
         </div>
-        <div class="song-info-card">
-          <div class="song-card-label next">Next Song</div>
-          <div class="song-card-title" id="hostNextTitle">No song reserved</div>
-          <div class="song-card-sub" id="hostNextQueueBy">Queue by: -</div>
+        <div class="singer-queue-subrow">
+          <span id="hostLandscapeMic">On the mic: Guest</span>
+          <span id="hostLandscapeQueueBy">Queue by: -</span>
         </div>
       </div>
 
@@ -878,17 +930,22 @@
 
     <!-- Upper Block (Portrait) / Right Column (Landscape): Song Info + Transport + Live Mirror -->
     <div class="right-stage-col">
-      <!-- Minimized Current Song & Next Song Cards -->
-      <div class="song-cards-row">
-        <div class="song-info-card">
-          <div class="song-card-label">Current Song</div>
-          <div class="song-card-title" id="ctrlNpTitle">Standby — No song playing</div>
-          <div class="song-card-sub" id="ctrlCurrentSinger">On the mic: Guest</div>
+      <div class="song-info-block">
+        <div class="song-cards-row">
+          <div class="song-info-card">
+            <div class="song-card-label">Current Song</div>
+            <div class="song-card-title" id="ctrlNpTitle">Standby — No song playing</div>
+            <div class="song-card-sub" id="ctrlCurrentSinger">On the mic: Guest</div>
+          </div>
+          <div class="song-info-card">
+            <div class="song-card-label next">Next Song</div>
+            <div class="song-card-title" id="ctrlNextTitle">No song reserved</div>
+            <div class="song-card-sub" id="ctrlNextQueueBy">Queue by: -</div>
+          </div>
         </div>
-        <div class="song-info-card">
-          <div class="song-card-label next">Next Song</div>
-          <div class="song-card-title" id="ctrlNextTitle">No song reserved</div>
-          <div class="song-card-sub" id="ctrlNextQueueBy">Queue by: -</div>
+        <div class="singer-queue-subrow">
+          <span id="ctrlLandscapeMic">On the mic: Guest</span>
+          <span id="ctrlLandscapeQueueBy">Queue by: -</span>
         </div>
       </div>
 
@@ -1039,6 +1096,7 @@
             renderStoppedUI();
           } else {
             document.getElementById('ctrlCurrentSinger').innerText = 'On the mic: Guest';
+            document.getElementById('ctrlLandscapeMic').innerText = 'On the mic: Guest';
             document.getElementById('ctrlPreviewSinger').innerText = 'On the mic: Guest';
           }
           return;
@@ -1053,6 +1111,7 @@
           }
         } else {
           document.getElementById('ctrlCurrentSinger').innerText = `On the mic: ${singerName}`;
+          document.getElementById('ctrlLandscapeMic').innerText = `On the mic: ${singerName}`;
           document.getElementById('ctrlPreviewSinger').innerText = `On the mic: ${singerName}`;
         }
       });
@@ -1406,8 +1465,10 @@
       document.getElementById('npNextMini').innerText = miniText;
       document.getElementById('hostNextTitle').innerText = nextSongTitle;
       document.getElementById('hostNextQueueBy').innerText = nextSongQueueBy;
+      document.getElementById('hostLandscapeQueueBy').innerText = nextSongQueueBy;
       document.getElementById('ctrlNextTitle').innerText = nextSongTitle;
       document.getElementById('ctrlNextQueueBy').innerText = nextSongQueueBy;
+      document.getElementById('ctrlLandscapeQueueBy').innerText = nextSongQueueBy;
 
       db.ref('state/upNext').set(miniText);
     }
@@ -1685,6 +1746,7 @@
       ytPlayer = null;
       document.getElementById('npTitle').innerText = 'Standby — No song playing';
       document.getElementById('hostCurrentSinger').innerText = 'On the mic: Guest';
+      document.getElementById('hostLandscapeMic').innerText = 'On the mic: Guest';
       document.getElementById('fsMicSinger').innerText = 'Guest';
       document.getElementById('mediaMount').innerHTML = '';
       document.getElementById('normalQrOverlay').classList.remove('hidden');
@@ -1696,6 +1758,7 @@
       const displayTitle = `${song.title} (Queue by: ${singerName})`;
       document.getElementById('npTitle').innerText = song.title;
       document.getElementById('hostCurrentSinger').innerText = `On the mic: ${singerName}`;
+      document.getElementById('hostLandscapeMic').innerText = `On the mic: ${singerName}`;
       document.getElementById('fsMicSinger').innerText = singerName;
       db.ref('state/nowPlaying').set(displayTitle);
       document.getElementById('normalQrOverlay').classList.add('hidden');
