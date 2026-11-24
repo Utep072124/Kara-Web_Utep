@@ -283,20 +283,59 @@
     }
 
     #ctrlLiveMirrorVideo.rot-0 {
-  transform: rotate(0deg) scale(1);
-}
+      transform: rotate(0deg) scale(1);
+    }
 
-#ctrlLiveMirrorVideo.rot-90 {
-  transform: rotate(90deg) scale(2.05);
-}
+    #ctrlLiveMirrorVideo.rot-90 {
+      transform: rotate(90deg) scale(2.05);
+    }
 
-#ctrlLiveMirrorVideo.rot-180 {
-  transform: rotate(180deg) scale(1);
-}
+    #ctrlLiveMirrorVideo.rot-180 {
+      transform: rotate(180deg) scale(1);
+    }
 
-#ctrlLiveMirrorVideo.rot-270 {
-  transform: rotate(270deg) scale(2.05);
-}
+    #ctrlLiveMirrorVideo.rot-270 {
+      transform: rotate(270deg) scale(2.05);
+    }
+
+    /* Tap-to-Play Overlay when Mobile Browser Pauses Autoplay */
+    .mirror-tap-play-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(3, 8, 22, 0.55);
+      cursor: pointer;
+    }
+
+    .mirror-tap-play-overlay.visible {
+      display: flex;
+    }
+
+    .mirror-tap-play-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0, 210, 255, 0.22);
+      border: 2px solid var(--accent);
+      color: #fff;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .mirror-tap-play-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      letter-spacing: 0.03em;
+    }
 
     /* Bottom-Right Corner Orientation Correction Buttons on Guest Live Mirror */
     .mirror-corner-controls {
@@ -1049,6 +1088,12 @@
             <div class="host-lost-banner" id="hostLostIndicator">⚠ HOST CONNECTION LOST</div>
           </div>
 
+          <!-- Tap-to-Play Overlay shown only if Mobile Safari/Chrome holds autoplay -->
+          <div class="mirror-tap-play-overlay" id="mirrorTapPlayOverlay">
+            <div class="mirror-tap-play-circle">▶</div>
+            <div class="mirror-tap-play-label">Tap to resume live mirror</div>
+          </div>
+
           <video id="ctrlLiveMirrorVideo" class="rot-0" autoplay muted playsinline style="display:none;"></video>
           <div id="ctrlPreviewMount" style="display:none; width:100%; height:100%;"></div>
 
@@ -1144,6 +1189,23 @@
       applyMirrorRotation();
     }
 
+    function resumeGuestMirrorVideo() {
+      const videoEl = document.getElementById('ctrlLiveMirrorVideo');
+      const tapOverlay = document.getElementById('mirrorTapPlayOverlay');
+      if (!videoEl || !videoEl.srcObject) return;
+
+      videoEl.muted = true;
+      videoEl.playsInline = true;
+      videoEl.play().then(() => {
+        if (tapOverlay) tapOverlay.classList.remove('visible');
+      }).catch((err) => {
+        console.warn('Guest mirror play() pending user tap:', err);
+        if (tapOverlay && isLiveMirrorConnected) {
+          tapOverlay.classList.add('visible');
+        }
+      });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
       const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(controllerUrl)}`;
@@ -1156,6 +1218,14 @@
         document.getElementById('hostView').setAttribute('data-active-view', 'false');
         document.getElementById('controllerView').style.display = 'flex';
         document.getElementById('controllerView').setAttribute('data-active-view', 'true');
+      }
+
+      const ctrlStageBox = document.getElementById('ctrlStageBox');
+      if (ctrlStageBox) {
+        ctrlStageBox.addEventListener('click', (e) => {
+          if (e.target.closest('.mirror-corner-controls')) return;
+          resumeGuestMirrorVideo();
+        });
       }
 
       if (!isControllerMode) {
@@ -1306,6 +1376,9 @@
         if (hostCaptureStream) {
           db.ref('mirror').remove();
         }
+      } else {
+        db.ref(`mirror/requests/${guestSessionId}`).remove();
+        db.ref(`mirror/sessions/${guestSessionId}`).remove();
       }
     });
 
@@ -1400,7 +1473,9 @@
         });
       } else {
         db.ref('mirror/hostActive').on('value', (snap) => {
-          hostMirrorEnabled = snap.val() === true;
+          const nextEnabled = snap.val() === true;
+          if (nextEnabled === hostMirrorEnabled && isLiveMirrorConnected) return;
+          hostMirrorEnabled = nextEnabled;
           if (hostMirrorEnabled) {
             connectGuestToLiveMirror();
           } else {
@@ -1417,9 +1492,20 @@
       guestPeer = pc;
 
       const videoEl = document.getElementById('ctrlLiveMirrorVideo');
+      const standbyOverlay = document.getElementById('ctrlStandbyOverlay');
+      const tapOverlay = document.getElementById('mirrorTapPlayOverlay');
+      const pendingHostCandidates = [];
 
       pc.oniceconnectionstatechange = () => {
-        if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+        console.log('Guest ICE state:', pc.iceConnectionState);
+        if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+          isLiveMirrorConnected = true;
+          standbyOverlay.classList.add('hidden');
+          document.getElementById('hostLostIndicator').classList.remove('visible');
+          document.getElementById('ctrlPreviewBadge').classList.remove('lost');
+          document.getElementById('ctrlPreviewBadge').innerText = '🔴 LIVE STAGE MIRROR (MUTED)';
+          resumeGuestMirrorVideo();
+        } else if (pc.iceConnectionState === 'failed') {
           teardownGuestLiveMirror();
           setHostLostState(true);
         }
@@ -1441,19 +1527,22 @@
         videoEl.srcObject = incomingStream;
         applyMirrorRotation();
 
-        const tryPlay = () => {
-          videoEl.play().catch(() => {});
+        videoEl.onloadedmetadata = resumeGuestMirrorVideo;
+        videoEl.oncanplay = resumeGuestMirrorVideo;
+        videoEl.onplaying = () => {
+          if (tapOverlay) tapOverlay.classList.remove('visible');
+        };
+        event.track.onunmute = () => {
+          standbyOverlay.classList.add('hidden');
+          resumeGuestMirrorVideo();
         };
 
-        videoEl.onloadedmetadata = tryPlay;
-        videoEl.oncanplay = tryPlay;
-        tryPlay();
-
-        document.getElementById('ctrlStandbyOverlay').classList.add('hidden');
+        standbyOverlay.classList.add('hidden');
         document.getElementById('hostLostIndicator').classList.remove('visible');
         document.getElementById('ctrlPreviewBadge').classList.remove('lost');
         document.getElementById('ctrlPreviewBadge').innerText = '🔴 LIVE STAGE MIRROR (MUTED)';
         isLiveMirrorConnected = true;
+        resumeGuestMirrorVideo();
       };
 
       pc.onicecandidate = (e) => {
@@ -1463,15 +1552,23 @@
       };
 
       const sessionRef = db.ref(`mirror/sessions/${guestSessionId}`);
+      const reqRef = db.ref(`mirror/requests/${guestSessionId}`);
       sessionRef.child('offer').off();
       sessionRef.child('hostCandidates').off();
       await sessionRef.remove();
-      await db.ref(`mirror/requests/${guestSessionId}`).set(Date.now());
+      await reqRef.remove();
+      reqRef.onDisconnect().remove();
+      sessionRef.onDisconnect().remove();
+      await reqRef.set(Date.now());
 
       sessionRef.child('offer').on('value', async (offerSnap) => {
         const offer = offerSnap.val();
         if (!offer || pc.currentRemoteDescription) return;
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        while (pendingHostCandidates.length > 0) {
+          const queuedCand = pendingHostCandidates.shift();
+          await pc.addIceCandidate(new RTCIceCandidate(queuedCand)).catch(() => {});
+        }
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         await sessionRef.child('answer').set({
@@ -1482,8 +1579,11 @@
 
       sessionRef.child('hostCandidates').on('child_added', async (candSnap) => {
         const cand = candSnap.val();
-        if (cand && pc.remoteDescription) {
+        if (!cand) return;
+        if (pc.remoteDescription) {
           await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+        } else {
+          pendingHostCandidates.push(cand);
         }
       });
     }
@@ -1499,10 +1599,14 @@
       sessionRef.child('hostCandidates').off();
 
       resetMirrorRotation();
+      const tapOverlay = document.getElementById('mirrorTapPlayOverlay');
+      if (tapOverlay) tapOverlay.classList.remove('visible');
+
       const videoEl = document.getElementById('ctrlLiveMirrorVideo');
       if (videoEl) {
         videoEl.onloadedmetadata = null;
         videoEl.oncanplay = null;
+        videoEl.onplaying = null;
         videoEl.srcObject = null;
         videoEl.style.display = 'none';
       }
