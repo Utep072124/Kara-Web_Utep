@@ -495,19 +495,19 @@
     .stage.custom-fullscreen .fs-qr-badge,
     .stage:fullscreen .fs-qr-badge {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: absolute;
-      top: clamp(12px, 2vh, 24px);
-      right: clamp(12px, 2vw, 24px);
-      background: rgba(255, 255, 255, 0.96);
-      padding: clamp(5px, 0.6vw, 10px);
-      border-radius: clamp(8px, 0.8vw, 14px);
-      z-index: 2147483647;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.75);
-      width: clamp(64px, 7.5vw, 135px);
-      text-align: center;
-    }
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: clamp(68px, 9.5vh, 104px); /* Shifted downward to clear the top-right projection pill */
+  right: clamp(12px, 2vw, 24px);
+  background: rgba(255, 255, 255, 0.96);
+  padding: clamp(5px, 0.6vw, 10px);
+  border-radius: clamp(8px, 0.8vw, 14px);
+  z-index: 2147483647;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.75);
+  width: clamp(64px, 7.5vw, 135px);
+  text-align: center;
+  }
 
     .stage.custom-fullscreen .fs-qr-badge img,
     .stage:fullscreen .fs-qr-badge img {
@@ -1206,6 +1206,8 @@
       });
     }
 
+let autoMirrorAttempted = false;
+
     window.addEventListener('DOMContentLoaded', () => {
       const controllerUrl = APP_URL + '?controller=true';
       const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(controllerUrl)}`;
@@ -1230,6 +1232,9 @@
 
       if (!isControllerMode) {
         startHostHeartbeat();
+        observeOnlineGuestsForProjection();
+      } else {
+        startGuestPresence();
       }
 
       initStageMirrorSignaling();
@@ -1337,64 +1342,44 @@
       }
     });
 
-    function startHostHeartbeat() {
-      db.ref('state/tvLastSeen').set(Date.now());
-      db.ref('state/tvLastSeen').onDisconnect().set(0);
-      hostHeartbeatTimer = setInterval(() => {
-        db.ref('state/tvLastSeen').set(Date.now());
-      }, 4000);
+    function startGuestPresence() {
+      const presenceRef = db.ref(`mirror/onlineGuests/${guestSessionId}`);
+      const connectedRef = db.ref('.info/connected');
+
+      connectedRef.on('value', (snap) => {
+        if (snap.val() === true) {
+          presenceRef.onDisconnect().remove();
+          presenceRef.set({
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
+          });
+        }
+      });
     }
 
-    function setHostLostState(isLost) {
-      const lostBanner = document.getElementById('hostLostIndicator');
-      const subtitle = document.getElementById('ctrlStandbySubtitle');
-      const badge = document.getElementById('ctrlPreviewBadge');
+    function observeOnlineGuestsForProjection() {
+      db.ref('mirror/onlineGuests').on('value', async (snap) => {
+        const guests = snap.val();
+        const onlineCount = guests ? Object.keys(guests).length : 0;
 
-      if (isLost) {
-        lostBanner.classList.add('visible');
-        subtitle.innerText = 'Host signal lost — Reconnecting...';
-        if (!isLiveMirrorConnected) {
-          badge.classList.add('lost');
-          badge.innerText = '⚠ HOST LOST';
+        if (onlineCount > 0) {
+          if (!hostCaptureStream && !autoMirrorAttempted) {
+            autoMirrorAttempted = true;
+            await startHostMirrorBroadcast(true);
+          }
+        } else {
+          autoMirrorAttempted = false;
+          if (hostCaptureStream) {
+            await stopHostMirrorBroadcast();
+          } else {
+            await db.ref('mirror/hostActive').set(false);
+          }
         }
-      } else {
-        lostBanner.classList.remove('visible');
-        if (!isLiveMirrorConnected) {
-          subtitle.innerText = hostMirrorEnabled
-            ? 'Mirror enabled — Connecting live video...'
-            : 'Standby — Waiting for Host Mirror';
-          badge.classList.remove('lost');
-          badge.innerText = hostMirrorEnabled ? '📡 MIRROR STARTING' : '⏳ STANDBY (MIRROR OFF)';
-        }
-      }
+      });
     }
 
-    window.addEventListener('beforeunload', () => {
-      if (!isControllerMode) {
-        if (hostHeartbeatTimer) clearInterval(hostHeartbeatTimer);
-        db.ref('state/tvLastSeen').set(0);
-        if (hostCaptureStream) {
-          db.ref('mirror').remove();
-        }
-      } else {
-        db.ref(`mirror/requests/${guestSessionId}`).remove();
-        db.ref(`mirror/sessions/${guestSessionId}`).remove();
-      }
-    });
-
-    async function toggleStageMirrorBroadcast() {
+    async function startHostMirrorBroadcast(isAutoTrigger = false) {
       const btn = document.getElementById('btnShareStage');
-      if (hostCaptureStream) {
-        hostCaptureStream.getTracks().forEach(t => t.stop());
-        hostCaptureStream = null;
-        Object.values(hostPeerMap).forEach(pc => pc.close());
-        hostPeerMap = {};
-        db.ref('mirror').remove();
-        btn.innerText = '📡 Mirror';
-        btn.classList.remove('danger');
-        btn.classList.add('secondary');
-        return;
-      }
+      if (hostCaptureStream) return;
 
       try {
         hostCaptureStream = await navigator.mediaDevices.getDisplayMedia({
@@ -1407,13 +1392,44 @@
         btn.classList.add('danger');
 
         hostCaptureStream.getVideoTracks()[0].onended = () => {
-          if (hostCaptureStream) toggleStageMirrorBroadcast();
+          stopHostMirrorBroadcast();
         };
 
-        await db.ref('mirror').remove();
         await db.ref('mirror/hostActive').set(true);
       } catch (err) {
-        alert('Screen share was cancelled or is not supported on this browser.');
+        autoMirrorAttempted = false;
+        if (!isAutoTrigger) {
+          alert('Screen share was cancelled or is not supported on this browser.');
+        } else {
+          console.warn('Auto getDisplayMedia requires user gesture on this TV browser; tap Mirror button:', err);
+        }
+      }
+    }
+
+    async function stopHostMirrorBroadcast() {
+      const btn = document.getElementById('btnShareStage');
+      if (hostCaptureStream) {
+        hostCaptureStream.getTracks().forEach(t => t.stop());
+        hostCaptureStream = null;
+      }
+      Object.values(hostPeerMap).forEach(pc => pc.close());
+      hostPeerMap = {};
+      await db.ref('mirror/hostActive').set(false);
+      await db.ref('mirror/sessions').remove();
+
+      if (btn) {
+        btn.innerText = '📡 Mirror';
+        btn.classList.remove('danger');
+        btn.classList.add('secondary');
+      }
+    }
+
+    async function toggleStageMirrorBroadcast() {
+      if (hostCaptureStream) {
+        await stopHostMirrorBroadcast();
+      } else {
+        autoMirrorAttempted = true;
+        await startHostMirrorBroadcast(false);
       }
     }
 
@@ -1484,6 +1500,51 @@
         });
       }
     }
+
+    function startHostHeartbeat() {
+      db.ref('state/tvLastSeen').set(Date.now());
+      db.ref('state/tvLastSeen').onDisconnect().set(0);
+      hostHeartbeatTimer = setInterval(() => {
+        db.ref('state/tvLastSeen').set(Date.now());
+      }, 4000);
+    }
+
+    function setHostLostState(isLost) {
+      const lostBanner = document.getElementById('hostLostIndicator');
+      const subtitle = document.getElementById('ctrlStandbySubtitle');
+      const badge = document.getElementById('ctrlPreviewBadge');
+
+      if (isLost) {
+        lostBanner.classList.add('visible');
+        subtitle.innerText = 'Host signal lost — Reconnecting...';
+        if (!isLiveMirrorConnected) {
+          badge.classList.add('lost');
+          badge.innerText = '⚠ HOST LOST';
+        }
+      } else {
+        lostBanner.classList.remove('visible');
+        if (!isLiveMirrorConnected) {
+          subtitle.innerText = hostMirrorEnabled
+            ? 'Mirror enabled — Connecting live video...'
+            : 'Standby — Waiting for Host Mirror';
+          badge.classList.remove('lost');
+          badge.innerText = hostMirrorEnabled ? '📡 MIRROR STARTING' : '⏳ STANDBY (MIRROR OFF)';
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (!isControllerMode) {
+        if (hostHeartbeatTimer) clearInterval(hostHeartbeatTimer);
+        db.ref('state/tvLastSeen').set(0);
+        if (hostCaptureStream) {
+          db.ref('mirror').remove();
+        }
+      } else {
+        db.ref(`mirror/requests/${guestSessionId}`).remove();
+        db.ref(`mirror/sessions/${guestSessionId}`).remove();
+      }
+    });
 
     async function connectGuestToLiveMirror() {
       teardownGuestLiveMirror();
