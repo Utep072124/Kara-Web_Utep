@@ -133,27 +133,43 @@
     });
 
     // Master Host approval prompt handler (shown on Master Host view)
-    function onIncomingRequest(snap) {
-      const req = snap.val();
-      if (!req || req.status !== "pending") return;
-      pendingRequestKey = snap.key;
-      approvalPromptText.textContent = `Guest "${req.guestName || req.guestId}" wants to host live view. Approve switch?`;
-      approvalBox.style.display = "block";
+let isMasterUnlocked = false; // Set to true after Master PIN ("072124") is verified
+
+function onIncomingRequest(snap) {
+  // Only the unlocked Master Host sees the Approve / Decline prompt
+  if (!isMasterUnlocked) return;
+
+  const req = snap.val();
+  if (!req || req.status !== "pending") return;
+
+  pendingRequestKey = snap.key;
+  approvalPromptText.textContent = `Guest "${req.guestName || req.guestId}" wants to host live view. Approve switch?`;
+  approvalBox.style.display = "block";
+}
+
+approveBtn.addEventListener("click", async () => {
+  if (!isMasterUnlocked || !pendingRequestKey) return;
+
+  // 1. Revoke any previously approved guest host so only one guest is active
+  const snapshot = await new Promise((resolve) => onValue(requestsRootRef, resolve, { onlyOnce: true }));
+  const allRequests = snapshot.val() || {};
+  const updates = {};
+
+  Object.entries(allRequests).forEach(([key, val]) => {
+    if (key !== pendingRequestKey && val && val.status === "approved") {
+      updates[`hostRequests/${key}/status`] = "revoked";
+      updates[`hostRequests/${key}/revokedAt`] = Date.now();
     }
+  });
 
-    onChildAdded(requestsRootRef, onIncomingRequest);
-    onChildChanged(requestsRootRef, onIncomingRequest);
+  // 2. Approve the newly selected guest host
+  updates[`hostRequests/${pendingRequestKey}/status`] = "approved";
+  updates[`hostRequests/${pendingRequestKey}/approvedAt`] = Date.now();
 
-    approveBtn.addEventListener("click", async () => {
-      if (!pendingRequestKey) return;
-      // Mark any other approved guest as revoked so only one guest host is active
-      await update(ref(db, `hostRequests/${pendingRequestKey}`), {
-        status: "approved",
-        approvedAt: Date.now()
-      });
-      approvalBox.style.display = "none";
-      pendingRequestKey = null;
-    });
+  await update(ref(db), updates);
+  approvalBox.style.display = "none";
+  pendingRequestKey = null;
+});
 
     declineBtn.addEventListener("click", async () => {
       if (!pendingRequestKey) return;
