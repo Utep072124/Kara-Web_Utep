@@ -17,6 +17,126 @@
   </style>
 </head>
 <body>
+ <style>
+  .singer-banner {
+    display: none;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fef08a;
+    color: #111;
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .master-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+  }
+  .btn-pin {
+    background: #334155;
+    color: #fff;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .pin-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .pin-backdrop.open { display: flex; }
+  .pin-modal {
+    width: 100%;
+    max-width: 370px;
+    background: #1c1c22;
+    color: #f5f5f5;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #333;
+  }
+  .pin-modal input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 6px;
+    padding: 9px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #111;
+    color: #fff;
+  }
+  .pin-error {
+    color: #f87171;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    min-height: 1.2em;
+  }
+  .pin-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<!-- Singer heads-up banner before live view switches -->
+<div id="singerNoticeBanner" class="singer-banner"></div>
+
+<!-- Master Host PIN Status & Button -->
+<div class="master-bar">
+  <span id="masterRoleBadge">Role: Guest</span>
+  <button id="openMasterPinBtn" type="button" class="btn-pin">Master PIN</button>
+</div>
+
+<!-- Master Host PIN Modal -->
+<div id="masterPinModal" class="pin-backdrop" aria-hidden="true">
+  <div class="pin-modal">
+    <h3 style="margin-top:0;">Master Host PIN</h3>
+    <p id="pinHelpText" style="font-size:0.88rem; color:#cbd5e1;">Default PIN is 072124. Choose an option:</p>
+
+    <div id="pinChoiceView" class="pin-actions">
+      <button id="chooseUsePinBtn" type="button" class="btn-primary">Use Existing Code</button>
+      <button id="chooseChangePinBtn" type="button" class="btn-pin">Change New PIN</button>
+      <button id="closePinModalBtn" type="button" class="btn-pin">Cancel</button>
+    </div>
+
+    <div id="pinVerifyView" style="display:none;">
+      <label for="verifyPinInput">Enter Master PIN</label>
+      <input id="verifyPinInput" type="password" inputmode="numeric" maxlength="12" placeholder="Enter PIN (default 072124)" />
+      <div class="pin-actions">
+        <button id="submitVerifyPinBtn" type="button" class="btn-approve">Unlock Master</button>
+        <button id="backFromVerifyBtn" type="button" class="btn-pin">Back</button>
+      </div>
+    </div>
+
+    <div id="pinChangeView" style="display:none;">
+      <label for="oldPinInput">Old PIN</label>
+      <input id="oldPinInput" type="password" inputmode="numeric" maxlength="12" placeholder="Current PIN" />
+
+      <label for="newPinInput" style="display:block; margin-top:8px;">New PIN</label>
+      <input id="newPinInput" type="password" inputmode="numeric" maxlength="12" placeholder="New PIN (4-12 chars)" />
+
+      <label for="confirmNewPinInput" style="display:block; margin-top:8px;">Confirm New PIN</label>
+      <input id="confirmNewPinInput" type="password" inputmode="numeric" maxlength="12" placeholder="Re-enter New PIN" />
+
+      <div class="pin-actions">
+        <button id="submitChangePinBtn" type="button" class="btn-approve">Save PIN</button>
+        <button id="backFromChangeBtn" type="button" class="btn-pin">Back</button>
+      </div>
+    </div>
+
+    <div id="pinErrorText" class="pin-error"></div>
+  </div>
+</div>
   <div class="card">
     <h2>Kara-TV Host Control</h2>
     <button id="requestHostBtn" class="btn-primary">Request Guest Host</button>
@@ -133,28 +253,153 @@
     });
 
     // Master Host approval prompt handler (shown on Master Host view)
-let isMasterUnlocked = false; // Set to true after Master PIN ("072124") is verified
+const DEFAULT_PIN = "072124";
+const PIN_KEY = "karatv_master_pin";
 
+let isMasterUnlocked = false;
+let currentDbPin = null;
+
+const singerBanner = document.getElementById("singerNoticeBanner");
+const masterRoleBadge = document.getElementById("masterRoleBadge");
+const pinModal = document.getElementById("masterPinModal");
+const pinChoiceView = document.getElementById("pinChoiceView");
+const pinVerifyView = document.getElementById("pinVerifyView");
+const pinChangeView = document.getElementById("pinChangeView");
+const pinErrorText = document.getElementById("pinErrorText");
+
+function getCurrentPin() {
+  if (typeof currentDbPin === "string" && currentDbPin.length >= 4) return currentDbPin;
+  return localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+}
+
+function setRoleLabel() {
+  masterRoleBadge.textContent = isMasterUnlocked ? "Role: Master Host (Unlocked)" : "Role: Guest";
+}
+
+function showSingerNotice(message) {
+  if (!singerBanner) return;
+  singerBanner.textContent = message;
+  singerBanner.style.display = "block";
+  clearTimeout(showSingerNotice._timer);
+  showSingerNotice._timer = setTimeout(() => {
+    singerBanner.style.display = "none";
+  }, 5000);
+}
+
+function setPinView(view) {
+  pinErrorText.textContent = "";
+  pinChoiceView.style.display = view === "choice" ? "flex" : "none";
+  pinVerifyView.style.display = view === "verify" ? "block" : "none";
+  pinChangeView.style.display = view === "change" ? "block" : "none";
+}
+
+function openPinModal() {
+  document.getElementById("verifyPinInput").value = "";
+  document.getElementById("oldPinInput").value = "";
+  document.getElementById("newPinInput").value = "";
+  document.getElementById("confirmNewPinInput").value = "";
+  setPinView("choice");
+  pinModal.classList.add("open");
+  pinModal.setAttribute("aria-hidden", "false");
+}
+
+function closePinModal() {
+  pinModal.classList.remove("open");
+  pinModal.setAttribute("aria-hidden", "true");
+}
+
+document.getElementById("openMasterPinBtn")?.addEventListener("click", openPinModal);
+document.getElementById("closePinModalBtn")?.addEventListener("click", closePinModal);
+document.getElementById("chooseUsePinBtn")?.addEventListener("click", () => {
+  setPinView("verify");
+  document.getElementById("verifyPinInput").focus();
+});
+document.getElementById("chooseChangePinBtn")?.addEventListener("click", () => {
+  setPinView("change");
+  document.getElementById("oldPinInput").focus();
+});
+document.getElementById("backFromVerifyBtn")?.addEventListener("click", () => setPinView("choice"));
+document.getElementById("backFromChangeBtn")?.addEventListener("click", () => setPinView("choice"));
+
+document.getElementById("submitVerifyPinBtn")?.addEventListener("click", () => {
+  const entered = document.getElementById("verifyPinInput").value.trim();
+  if (entered !== getCurrentPin()) {
+    pinErrorText.textContent = "Invalid Master PIN.";
+    return;
+  }
+  isMasterUnlocked = true;
+  setRoleLabel();
+  closePinModal();
+  // Re-evaluate any pending requests now that Master Host is unlocked
+  onValue(requestsRootRef, (snap) => {
+    snap.forEach((child) => onIncomingRequest(child));
+  }, { onlyOnce: true });
+});
+
+document.getElementById("submitChangePinBtn")?.addEventListener("click", async () => {
+  const oldPin = document.getElementById("oldPinInput").value.trim();
+  const newPin = document.getElementById("newPinInput").value.trim();
+  const confirmPin = document.getElementById("confirmNewPinInput").value.trim();
+
+  if (oldPin !== getCurrentPin()) {
+    pinErrorText.textContent = "Old PIN does not match.";
+    return;
+  }
+  if (newPin.length < 4 || newPin.length > 12) {
+    pinErrorText.textContent = "New PIN must be 4 to 12 characters.";
+    return;
+  }
+  if (newPin !== confirmPin) {
+    pinErrorText.textContent = "New PIN and confirmation do not match.";
+    return;
+  }
+
+  localStorage.setItem(PIN_KEY, newPin);
+  currentDbPin = newPin;
+  try {
+    await update(ref(db, "host"), { masterPin: newPin });
+  } catch (_err) {
+    // Keep localStorage updated even if offline or restricted
+  }
+  pinErrorText.textContent = "PIN updated! You can now use your new PIN.";
+  setPinView("choice");
+});
+
+// Keep currentDbPin synced if updated on another device
+onValue(ref(db, "host/masterPin"), (snap) => {
+  const val = snap.val();
+  if (typeof val === "string" && val.length >= 4) {
+    currentDbPin = val;
+  }
+});
+
+// Notify singer when a guest requests a host switch
 function onIncomingRequest(snap) {
-  // Only the unlocked Master Host sees the Approve / Decline prompt
-  if (!isMasterUnlocked) return;
-
   const req = snap.val();
   if (!req || req.status !== "pending") return;
+
+  showSingerNotice(`Notice: ${req.guestName || req.guestId} requested to take over live view.`);
+
+  // Only the unlocked Master Host sees the Approve / Decline box
+  if (!isMasterUnlocked) return;
 
   pendingRequestKey = snap.key;
   approvalPromptText.textContent = `Guest "${req.guestName || req.guestId}" wants to host live view. Approve switch?`;
   approvalBox.style.display = "block";
 }
 
+onChildAdded(requestsRootRef, onIncomingRequest);
+onChildChanged(requestsRootRef, onIncomingRequest);
+
 approveBtn.addEventListener("click", async () => {
   if (!isMasterUnlocked || !pendingRequestKey) return;
 
-  // 1. Revoke any previously approved guest host so only one guest is active
   const snapshot = await new Promise((resolve) => onValue(requestsRootRef, resolve, { onlyOnce: true }));
   const allRequests = snapshot.val() || {};
+  const targetReq = allRequests[pendingRequestKey];
   const updates = {};
 
+  // Disable 1st host / revoke any previously approved guest before enabling 2nd host
   Object.entries(allRequests).forEach(([key, val]) => {
     if (key !== pendingRequestKey && val && val.status === "approved") {
       updates[`hostRequests/${key}/status`] = "revoked";
@@ -162,14 +407,17 @@ approveBtn.addEventListener("click", async () => {
     }
   });
 
-  // 2. Approve the newly selected guest host
   updates[`hostRequests/${pendingRequestKey}/status`] = "approved";
   updates[`hostRequests/${pendingRequestKey}/approvedAt`] = Date.now();
+
+  showSingerNotice(`Switching live view to ${targetReq?.guestName || pendingRequestKey}...`);
 
   await update(ref(db), updates);
   approvalBox.style.display = "none";
   pendingRequestKey = null;
 });
+
+setRoleLabel();
 
     declineBtn.addEventListener("click", async () => {
       if (!pendingRequestKey) return;
